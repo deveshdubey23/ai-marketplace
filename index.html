@@ -8,12 +8,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
-    <!-- Using a slightly older, more stable Babel version for standalone use -->
     <script src="https://unpkg.com/@babel/standalone@7.23.10/babel.min.js"></script>
     
-    <!-- Load Lucide Core and Lucide React -->
-    <script src="https://unpkg.com/lucide@0.412.0/dist/umd/lucide.min.js"></script>
-    <script src="https://unpkg.com/lucide-react@0.412.0/dist/umd/lucide-react.min.js"></script>
+    <!-- Load Core Lucide - The most stable version for this environment -->
+    <script src="https://unpkg.com/lucide@0.344.0/dist/umd/lucide.min.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
@@ -24,6 +22,7 @@
             color: white;
             margin: 0;
             padding: 0;
+            overflow-x: hidden;
         }
 
         .no-scrollbar::-webkit-scrollbar {
@@ -35,12 +34,35 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
         .animate-fade-in {
-            animation: fadeIn 0.4s ease-out forwards;
+            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* SVG fixes */
+        svg {
+            display: inline-block;
+            vertical-align: middle;
+            flex-shrink: 0;
+        }
+
+        .tool-card-glow {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 140px;
+            height: 140px;
+            filter: blur(60px);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .tool-card:hover .tool-card-glow {
+            opacity: 0.15;
         }
     </style>
 </head>
@@ -50,65 +72,86 @@
     <script type="text/babel">
         const { useState, useMemo, useEffect } = React;
         
-        // Define Icons helper safely
-        const Icons = window.lucideReact || {};
+        /**
+         * Robust Icon Component
+         * Manually renders SVGs from Lucide Core metadata to avoid React-wrapper conflicts
+         */
+        const Icon = ({ name, className = "w-4 h-4", strokeWidth = 2.5, ...props }) => {
+            const iconData = window.lucide?.icons?.[name] || 
+                             window.lucide?.icons?.[name.toLowerCase()] || 
+                             window.lucide?.icons?.[name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()] ||
+                             window.lucide?.icons?.['sparkles'];
+            
+            if (!iconData) return null;
 
-        // Fallback for missing icons to prevent crashes
-        const SafeIcon = ({ iconName, ...props }) => {
-            const IconComponent = Icons[iconName] || Icons.HelpCircle || Icons.Sparkles;
-            return IconComponent ? <IconComponent {...props} /> : null;
+            const [tag, attrs, children] = iconData;
+
+            const renderNodes = (nodes) => {
+                return nodes.map(([childTag, childAttrs], i) => 
+                    React.createElement(childTag, { ...childAttrs, key: i })
+                );
+            };
+
+            return (
+                <svg
+                    {...attrs}
+                    className={className}
+                    strokeWidth={strokeWidth}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    {...props}
+                >
+                    {renderNodes(children)}
+                </svg>
+            );
         };
 
         const CATEGORY_ICONS = {
-            All: <SafeIcon iconName="Sparkles" className="w-4 h-4" />,
-            LLM: <SafeIcon iconName="Bot" className="w-4 h-4" />,
-            Inference: <SafeIcon iconName="Zap" className="w-4 h-4" />,
-            Images: <SafeIcon iconName="PenTool" className="w-4 h-4" />,
-            Video: <SafeIcon iconName="Video" className="w-4 h-4" />,
-            Audio: <SafeIcon iconName="Mic" className="w-4 h-4" />,
-            Web: <SafeIcon iconName="Globe" className="w-4 h-4" />,
-            Document: <SafeIcon iconName="FileText" className="w-4 h-4" />,
-            Data: <SafeIcon iconName="Database" className="w-4 h-4" />,
-            Coding: <SafeIcon iconName="Code" className="w-4 h-4" />,
-            Marketing: <SafeIcon iconName="LineChart" className="w-4 h-4" />,
-            Legal: <SafeIcon iconName="Scale" className="w-4 h-4" />,
-            Sales: <SafeIcon iconName="ShoppingBag" className="w-4 h-4" />,
-            DevTools: <SafeIcon iconName="Terminal" className="w-4 h-4" />,
-            Support: <SafeIcon iconName="Headphones" className="w-4 h-4" />,
-            Productivity: <SafeIcon iconName="Clock" className="w-4 h-4" />,
-            Design: <SafeIcon iconName="LayoutGrid" className="w-4 h-4" />,
-            Security: <SafeIcon iconName="ShieldCheck" className="w-4 h-4" />,
-            Search: <SafeIcon iconName="Search" className="w-4 h-4" />,
-            Translation: <SafeIcon iconName="Languages" className="w-4 h-4" />,
-            HR: <SafeIcon iconName="Users" className="w-4 h-4" />,
-            Automation: <SafeIcon iconName="Zap" className="w-4 h-4" />,
-            Enterprise: <SafeIcon iconName="Layers" className="w-4 h-4" />,
-            Medical: <SafeIcon iconName="Stethoscope" className="w-4 h-4" />,
-            Research: <SafeIcon iconName="BookOpen" className="w-4 h-4" />,
-            Writing: <SafeIcon iconName="FileText" className="w-4 h-4" />
+            All: 'sparkles',
+            LLM: 'bot',
+            Inference: 'zap',
+            Images: 'pen-tool',
+            Video: 'video',
+            Audio: 'mic',
+            Web: 'globe',
+            Document: 'file-text',
+            Data: 'database',
+            Coding: 'code',
+            Marketing: 'line-chart',
+            Legal: 'scale',
+            Sales: 'shopping-bag',
+            DevTools: 'terminal',
+            Support: 'headphones',
+            Productivity: 'clock',
+            Design: 'layout-grid',
+            Security: 'shield-check',
+            Search: 'search',
+            Translation: 'languages',
+            HR: 'users',
+            Automation: 'zap',
+            Enterprise: 'layers',
+            Medical: 'stethoscope',
+            Research: 'book-open',
+            Writing: 'file-text'
         };
 
         const AI_TOOLS = [
-            { id: 'openai', name: 'OpenAI (GPT-4o)', category: 'LLM', hq: 'USA', setupTime: '2m', pricingModel: 'Usage', pricingDetail: '$5/1M tokens', freeTier: 'Limited', pricingLink: 'https://openai.com/api/pricing/', docsLink: 'https://platform.openai.com/docs/', homeLink: 'https://openai.com/', n8nStatus: 'Native Node', description: 'The industry leader for reasoning, vision, and advanced function calling.', accent: '#10a37f' },
-            { id: 'anthropic', name: 'Anthropic Claude', category: 'LLM', hq: 'USA', setupTime: '3m', pricingModel: 'Usage', pricingDetail: '$3/1M (Sonnet)', freeTier: '$5 Credit', pricingLink: 'https://www.anthropic.com/pricing', docsLink: 'https://docs.anthropic.com/', homeLink: 'https://anthropic.com/', n8nStatus: 'Native Node', description: 'Exceptional reasoning capabilities with a massive 200k+ context window.', accent: '#d97757' },
-            { id: 'google-gemini', name: 'Google Gemini', category: 'LLM', hq: 'USA', setupTime: '2m', pricingModel: 'Hybrid', pricingDetail: 'Free / Paid tiers', freeTier: '15 RPM Free', pricingLink: 'https://ai.google.dev/pricing', docsLink: 'https://ai.google.dev/docs', homeLink: 'https://aistudio.google.com/', n8nStatus: 'Native Node', description: 'Multimodal powerhouse with a 2M+ context window and Google ecosystem integration.', accent: '#4285f4' },
+            { id: 'openai', name: 'OpenAI (GPT-4o)', category: 'LLM', hq: 'USA', setupTime: '2m', pricingModel: 'Usage', pricingDetail: '$5/1M tokens', freeTier: 'Limited', pricingLink: 'https://openai.com/api/pricing/', docsLink: 'https://platform.openai.com/docs/', homeLink: 'https://openai.com/', n8nStatus: 'Native Node', description: 'Industry standard for text, vision, and function calling.', accent: '#10a37f' },
+            { id: 'anthropic', name: 'Anthropic Claude', category: 'LLM', hq: 'USA', setupTime: '3m', pricingModel: 'Usage', pricingDetail: '$3/1M (Sonnet)', freeTier: '$5 Credit', pricingLink: 'https://www.anthropic.com/pricing', docsLink: 'https://docs.anthropic.com/', homeLink: 'https://anthropic.com/', n8nStatus: 'Native Node', description: 'Exceptional reasoning and long-context (200k+).', accent: '#d97757' },
+            { id: 'google-gemini', name: 'Google Gemini', category: 'LLM', hq: 'USA', setupTime: '2m', pricingModel: 'Hybrid', pricingDetail: 'Free tiers', freeTier: '15 RPM Free', pricingLink: 'https://ai.google.dev/pricing', docsLink: 'https://ai.google.dev/docs', homeLink: 'https://aistudio.google.com/', n8nStatus: 'Native Node', description: 'Massive 2M+ context window and Google ecosystem integration.', accent: '#4285f4' },
             { id: 'mistral', name: 'Mistral AI', category: 'LLM', hq: 'France', setupTime: '2m', pricingModel: 'Usage', pricingDetail: '€2/1M (Large)', freeTier: 'Free trial', pricingLink: 'https://mistral.ai/en/pricing', docsLink: 'https://docs.mistral.ai/', homeLink: 'https://mistral.ai/', n8nStatus: 'Native Node', description: 'Leading European high-efficiency open and proprietary models.', accent: '#fd533e' },
-            { id: 'deepseek', name: 'DeepSeek V3', category: 'LLM', hq: 'China', setupTime: '1m', pricingModel: 'Usage', pricingDetail: '$0.14/1M tokens', freeTier: 'Initial credit', pricingLink: 'https://www.deepseek.com/', docsLink: 'https://api-docs.deepseek.com/', homeLink: 'https://www.deepseek.com/', n8nStatus: 'HTTP Request', description: 'Unbeatable performance-to-price ratio for logic and coding tasks.', accent: '#615ced' },
-            { id: 'cohere', name: 'Cohere', category: 'LLM', hq: 'Canada', setupTime: '3m', pricingModel: 'Usage', pricingDetail: 'Usage-based', freeTier: 'Trial keys', pricingLink: 'https://cohere.com/pricing', docsLink: 'https://docs.cohere.com/', homeLink: 'https://cohere.com/', n8nStatus: 'Native Node', description: 'Enterprise-grade LLM specifically focused on RAG and industrial tool-use.', accent: '#3d5afe' },
-            { id: 'groq', name: 'Groq', category: 'Inference', hq: 'USA', setupTime: '1m', pricingModel: 'Usage', pricingDetail: '$0.05/1M (Llama3)', freeTier: 'Public tier', pricingLink: 'https://groq.com/pricing/', docsLink: 'https://console.groq.com/docs/', homeLink: 'https://groq.com/', n8nStatus: 'LangChain', description: 'The worlds fastest LPU inference engine for real-time AI agents.', accent: '#f55036' },
-            { id: 'together', name: 'Together AI', category: 'Inference', hq: 'USA', setupTime: '2m', pricingModel: 'Usage', pricingDetail: 'Per token', freeTier: '$25 credit', pricingLink: 'https://www.together.ai/pricing', docsLink: 'https://docs.together.ai/', homeLink: 'https://www.together.ai/', n8nStatus: 'HTTP Request', description: 'Cloud platform for high-speed open-source model hosting and fine-tuning.', accent: '#000000' },
-            { id: 'replicate', name: 'Replicate', category: 'Inference', hq: 'USA', setupTime: '3m', pricingModel: 'Usage', pricingDetail: 'Per-second GPU', freeTier: 'Small trial', pricingLink: 'https://replicate.com/pricing', docsLink: 'https://replicate.com/docs', homeLink: 'https://replicate.com/', n8nStatus: 'Native Node', description: 'Run and deploy open-source AI models with a single API call.', accent: '#000000' },
-            { id: 'elevenlabs', name: 'ElevenLabs', category: 'Audio', hq: 'Global', setupTime: '2m', pricingModel: 'Subscription', pricingDetail: '$5/mo starter', freeTier: '10k chars/mo', pricingLink: 'https://elevenlabs.io/pricing', docsLink: 'https://elevenlabs.io/docs', homeLink: 'https://elevenlabs.io/', n8nStatus: 'Native Node', description: 'Unrivaled high-fidelity AI text-to-speech and voice cloning.', accent: '#ff8a00' },
-            { id: 'deepgram', name: 'Deepgram', category: 'Audio', hq: 'USA', setupTime: '1m', pricingModel: 'Usage', pricingDetail: '$0.004/min', freeTier: '$200 credit', pricingLink: 'https://deepgram.com/pricing', docsLink: 'https://developers.deepgram.com/', homeLink: 'https://deepgram.com/', n8nStatus: 'HTTP Request', description: 'Blazing fast transcription and intelligence for audio data.', accent: '#13ef95' },
-            { id: 'suno', name: 'Suno AI', category: 'Audio', hq: 'USA', setupTime: '1m', pricingModel: 'Sub', pricingDetail: '$8/mo basic', freeTier: '50 credits/day', pricingLink: 'https://suno.com/pricing', docsLink: 'https://www.google.com/search?q=suno+api+docs', homeLink: 'https://suno.com/', n8nStatus: 'HTTP Request', description: 'Studio-quality music and song generation from text descriptions.', accent: '#ff0055' },
-            { id: 'heygen', name: 'HeyGen', category: 'Video', hq: 'USA', setupTime: '5m', pricingModel: 'Sub', pricingDetail: '$29/mo starter', freeTier: '1 min free', pricingLink: 'https://www.heygen.com/pricing', docsLink: 'https://docs.heygen.com/reference', homeLink: 'https://www.heygen.com/', n8nStatus: 'Native Node', description: 'Professional AI avatars and video translation for enterprise teams.', accent: '#ff4d4d' },
-            { id: 'runway', name: 'Runway Gen-3', category: 'Video', hq: 'USA', setupTime: '5m', pricingModel: 'Sub', pricingDetail: '$12/mo std', freeTier: 'Credits', pricingLink: 'https://runwayml.com/pricing', docsLink: 'https://help.runwayml.com/', homeLink: 'https://runwayml.com/', n8nStatus: 'HTTP Request', description: 'Cinematic AI video generation and world-class creative tools.', accent: '#ffffff' },
-            { id: 'luma', name: 'Luma Dream Machine', category: 'Video', hq: 'USA', setupTime: '2m', pricingModel: 'Sub', pricingDetail: '$29/mo Lite', freeTier: '30 free/mo', pricingLink: 'https://lumalabs.ai/dream-machine/pricing', docsLink: 'https://lumalabs.ai/docs', homeLink: 'https://lumalabs.ai/', n8nStatus: 'HTTP Request', description: 'Hyper-realistic video generation from text and images.', accent: '#6366f1' },
-            { id: 'firecrawl', name: 'Firecrawl', category: 'Web', hq: 'Global', setupTime: '2m', pricingModel: 'Usage', pricingDetail: '$19/mo', freeTier: '500 scrapes', pricingLink: 'https://www.firecrawl.dev/pricing', docsLink: 'https://docs.firecrawl.dev/', homeLink: 'https://www.firecrawl.dev/', n8nStatus: 'Native Node', description: 'Convert any website into LLM-ready clean Markdown effortlessly.', accent: '#eb5e28' },
-            { id: 'tavily', name: 'Tavily Search', category: 'Search', hq: 'USA', setupTime: '1m', pricingModel: 'Usage', pricingDetail: '$0.01/call', freeTier: '1k calls', pricingLink: 'https://tavily.com/#pricing', docsLink: 'https://docs.tavily.com/', homeLink: 'https://tavily.com/', n8nStatus: 'Native Node', description: 'AI-native search engine optimized for RAG and research agents.', accent: '#23d18c' },
-            { id: 'apify', name: 'Apify', category: 'Web', hq: 'EU', setupTime: '10m', pricingModel: 'Usage', pricingDetail: '$49/mo', freeTier: '$5 credit/mo', pricingLink: 'https://apify.com/pricing', docsLink: 'https://docs.apify.com/', homeLink: 'https://apify.com/', n8nStatus: 'Native Node', description: 'The most comprehensive platform for web scraping and browser automation.', accent: '#ff0000' },
-            { id: 'notion-ai', name: 'Notion AI', category: 'Productivity', hq: 'USA', setupTime: '1m', pricingModel: 'Sub', pricingDetail: '$10/mo addon', freeTier: 'Limited', pricingLink: 'https://www.notion.so/product/ai', docsLink: 'https://developers.notion.com/', homeLink: 'https://www.notion.so/', n8nStatus: 'Native Node', description: 'Integrated workspace AI for summarizing, writing, and database automation.', accent: '#000000' },
-            { id: 'cursor', name: 'Cursor', category: 'Coding', hq: 'USA', setupTime: '2m', pricingModel: 'Sub', pricingDetail: '$20/mo Pro', freeTier: 'Limited', pricingLink: 'https://cursor.com/pricing', docsLink: 'https://docs.cursor.com/', homeLink: 'https://cursor.com/', n8nStatus: 'Local IDE', description: 'The worlds first AI-native code editor, built on VS Code.', accent: '#3b82f6' }
+            { id: 'deepseek', name: 'DeepSeek V3', category: 'LLM', hq: 'China', setupTime: '1m', pricingModel: 'Usage', pricingDetail: '$0.14/1M tokens', freeTier: 'Initial credit', pricingLink: 'https://www.deepseek.com/', docsLink: 'https://api-docs.deepseek.com/', homeLink: 'https://www.deepseek.com/', n8nStatus: 'HTTP Request', description: 'Extreme performance-to-price ratio LLM for logic tasks.', accent: '#615ced' },
+            { id: 'groq', name: 'Groq', category: 'Inference', hq: 'USA', setupTime: '1m', pricingModel: 'Usage', pricingDetail: '$0.05/1M tokens', freeTier: 'Public tier', pricingLink: 'https://groq.com/pricing/', docsLink: 'https://console.groq.com/docs/', homeLink: 'https://groq.com/', n8nStatus: 'LangChain', description: 'Ultra-fast LPU inference for real-time agent responses.', accent: '#f55036' },
+            { id: 'together', name: 'Together AI', category: 'Inference', hq: 'USA', setupTime: '2m', pricingModel: 'Usage', pricingDetail: 'Per token', freeTier: '$25 credit', pricingLink: 'https://www.together.ai/pricing', docsLink: 'https://docs.together.ai/', homeLink: 'https://www.together.ai/', n8nStatus: 'HTTP Request', description: 'Cloud for high-speed open-source model hosting.', accent: '#ffffff' },
+            { id: 'replicate', name: 'Replicate', category: 'Inference', hq: 'USA', setupTime: '3m', pricingModel: 'Usage', pricingDetail: 'Per-second GPU', freeTier: 'Small trial', pricingLink: 'https://replicate.com/pricing', docsLink: 'https://replicate.com/docs', homeLink: 'https://replicate.com/', n8nStatus: 'Native Node', description: 'Deploy open-source AI models with one line of code.', accent: '#ffffff' },
+            { id: 'elevenlabs', name: 'ElevenLabs', category: 'Audio', hq: 'Global', setupTime: '2m', pricingModel: 'Sub', pricingDetail: '$5/mo starter', freeTier: '10k chars/mo', pricingLink: 'https://elevenlabs.io/pricing', docsLink: 'https://elevenlabs.io/docs', homeLink: 'https://elevenlabs.io/', n8nStatus: 'Native Node', description: 'The gold standard for high-fidelity AI text-to-speech.', accent: '#ff8a00' },
+            { id: 'heygen', name: 'HeyGen', category: 'Video', hq: 'USA', setupTime: '5m', pricingModel: 'Sub', pricingDetail: '$29/mo starter', freeTier: '1 min free', pricingLink: 'https://www.heygen.com/pricing', docsLink: 'https://docs.heygen.com/reference', homeLink: 'https://www.heygen.com/', n8nStatus: 'Native Node', description: 'AI avatars and high-quality video translation.', accent: '#ff4d4d' },
+            { id: 'firecrawl', name: 'Firecrawl', category: 'Web', hq: 'Global', setupTime: '2m', pricingModel: 'Usage', pricingDetail: '$19/mo', freeTier: '500 scrapes', pricingLink: 'https://www.firecrawl.dev/pricing', docsLink: 'https://docs.firecrawl.dev/', homeLink: 'https://www.firecrawl.dev/', n8nStatus: 'Native Node', description: 'Convert any website into LLM-ready clean Markdown.', accent: '#eb5e28' },
+            { id: 'tavily', name: 'Tavily Search', category: 'Search', hq: 'USA', setupTime: '1m', pricingModel: 'Usage', pricingDetail: '$0.01/call', freeTier: '1k calls', pricingLink: 'https://tavily.com/#pricing', docsLink: 'https://docs.tavily.com/', homeLink: 'https://tavily.com/', n8nStatus: 'Native Node', description: 'Search engine optimized for LLM agent research.', accent: '#23d18c' },
+            { id: 'notion-ai', name: 'Notion AI', category: 'Productivity', hq: 'USA', setupTime: '1m', pricingModel: 'Sub', pricingDetail: '$10/mo addon', freeTier: 'Limited', pricingLink: 'https://www.notion.so/product/ai', docsLink: 'https://developers.notion.com/', homeLink: 'https://www.notion.so/', n8nStatus: 'Native Node', description: 'Integrated workspace AI for summarizing and writing.', accent: '#ffffff' },
+            { id: 'cursor', name: 'Cursor', category: 'Coding', hq: 'USA', setupTime: '2m', pricingModel: 'Sub', pricingDetail: '$20/mo Pro', freeTier: 'Limited', pricingLink: 'https://cursor.com/pricing', docsLink: 'https://docs.cursor.com/', homeLink: 'https://cursor.com/', n8nStatus: 'Local IDE', description: 'The world\'s first AI-native code editor.', accent: '#3b82f6' }
         ];
 
         const App = () => {
@@ -139,7 +182,7 @@
 
             const handleLinkedInShare = () => {
                 const shareUrl = window.location.href;
-                const shareText = `I just found the ultimate AI Intelligence Directory! 🚀 Over 150+ tools indexed for automation. Check it out: ${shareUrl}`;
+                const shareText = `Check out Neural Hub - the ultimate AI agents index! 🚀 ${shareUrl}`;
                 
                 const textArea = document.createElement("textarea");
                 textArea.value = shareText;
@@ -149,51 +192,50 @@
                     document.execCommand('copy');
                     setShowToast(true);
                     setTimeout(() => setShowToast(false), 5000);
-                } catch (err) {
-                    console.error('Copy failed', err);
-                }
+                } catch (err) {}
                 document.body.removeChild(textArea);
-
                 window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`, '_blank');
             };
 
             return (
-                <div className="min-h-screen text-white selection:bg-indigo-500/30">
+                <div className="min-h-screen text-white selection:bg-indigo-500/30 pb-20">
                     {/* SUCCESS TOAST */}
                     {showToast && (
                         <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 px-6 py-4 bg-indigo-600 rounded-2xl shadow-2xl border border-white/20 animate-fade-in">
-                            <SafeIcon iconName="CheckCircle2" className="w-5 h-5 text-white" />
+                            <Icon name="check-circle" className="w-5 h-5 text-white" />
                             <div className="text-left">
-                                <p className="text-sm font-bold">Post text copied to clipboard!</p>
+                                <p className="text-sm font-bold">Copy success!</p>
                                 <p className="text-[10px] text-indigo-100 font-medium">LinkedIn opened. Paste (Ctrl+V) to share.</p>
                             </div>
                             <button onClick={() => setShowToast(false)} className="ml-4 p-1 hover:bg-white/10 rounded-lg">
-                                <SafeIcon iconName="X" className="w-4 h-4" />
+                                <Icon name="x" className="w-4 h-4" />
                             </button>
                         </div>
                     )}
 
-                    {/* Dynamic Header */}
+                    {/* Header */}
                     <header className={`fixed top-0 w-full z-50 transition-all duration-300 border-b ${scrolled ? 'bg-black/80 backdrop-blur-xl border-white/10 py-3' : 'bg-transparent border-transparent py-6'}`}>
                         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between gap-8">
-                            <div className="flex items-center gap-3 shrink-0 cursor-pointer" onClick={() => {setSearchTerm(''); setSelectedCategory('All'); window.scrollTo({top: 0, behavior: 'smooth'});}}>
+                            <div className="flex items-center gap-3 shrink-0 cursor-pointer" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
                                 <div className="relative group">
                                     <div className="absolute -inset-1 bg-gradient-to-r from-indigo-600 to-cyan-500 rounded-lg blur opacity-40 group-hover:opacity-100 transition duration-500"></div>
-                                    <div className="relative p-2 bg-black rounded-lg border border-white/20">
-                                        <SafeIcon iconName="Cpu" className="w-6 h-6 text-white" />
+                                    <div className="relative p-2 bg-black rounded-lg border border-white/20 flex items-center justify-center">
+                                        <Icon name="cpu" className="w-6 h-6 text-white" />
                                     </div>
                                 </div>
                                 <div className="hidden sm:block text-left">
-                                    <h1 className="text-lg font-bold tracking-tight text-white leading-none uppercase italic">NEURAL HUB</h1>
+                                    <h1 className="text-lg font-black tracking-tight text-white leading-none uppercase italic">NEURAL HUB</h1>
                                     <p className="text-[10px] font-medium tracking-widest text-white/40 uppercase mt-1">AI AGENT INDEX</p>
                                 </div>
                             </div>
 
                             <div className="relative flex-grow max-w-xl group">
-                                <SafeIcon iconName="Search" className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 w-4 h-4 group-focus-within:text-indigo-400 transition-colors" />
+                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-indigo-400 transition-colors">
+                                    <Icon name="search" className="w-4 h-4" />
+                                </div>
                                 <input 
                                     type="text" 
-                                    placeholder="Search tools (e.g. 'n8n native', 'Gemini', 'Automation')..." 
+                                    placeholder="Search 150+ tools (e.g. 'n8n', 'Gemini')..." 
                                     className="w-full pl-11 pr-4 py-2.5 bg-white/5 border border-white/10 focus:border-indigo-500/50 focus:bg-white/10 rounded-full text-sm transition-all outline-none placeholder:text-white/20 text-white"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -205,7 +247,7 @@
                                     onClick={handleLinkedInShare}
                                     className="group flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-white text-white hover:text-black rounded-full text-xs font-bold transition-all shadow-[0_0_20px_rgba(79,70,229,0.3)] active:scale-95"
                                 >
-                                    <SafeIcon iconName="Linkedin" className="w-3.5 h-3.5 fill-white group-hover:fill-black" />
+                                    <Icon name="linkedin" className="w-3.5 h-3.5 fill-current" />
                                     SHARE
                                 </button>
                                 <div className="hidden md:flex items-center gap-1 border-l border-white/10 pl-4">
@@ -213,94 +255,84 @@
                                         onClick={() => setViewMode('grid')}
                                         className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white'}`}
                                     >
-                                        <SafeIcon iconName="LayoutGrid" className="w-4 h-4" />
+                                        <Icon name="layout-grid" className="w-4 h-4" />
                                     </button>
                                     <button 
                                         onClick={() => setViewMode('list')}
                                         className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white'}`}
                                     >
-                                        <SafeIcon iconName="List" className="w-4 h-4" />
+                                        <Icon name="list" className="w-4 h-4" />
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </header>
 
-                    <main className="max-w-7xl mx-auto px-6 pt-32 pb-20">
-                        {/* Category Horizontal Scroll */}
+                    <main className="max-w-7xl mx-auto px-6 pt-32">
+                        {/* Horizontal Categories */}
                         <div className="flex items-center gap-2 mb-12 overflow-x-auto pb-4 no-scrollbar">
-                            <div className="flex items-center gap-2">
-                                {categories.map(cat => (
-                                    <button
-                                        key={cat}
-                                        onClick={() => setSelectedCategory(cat)}
-                                        className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-semibold whitespace-nowrap border transition-all ${
-                                            selectedCategory === cat 
-                                            ? 'bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)]' 
-                                            : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:border-white/20'
-                                        }`}
-                                    >
-                                        {CATEGORY_ICONS[cat] || <SafeIcon iconName="Sparkles" className="w-3.5 h-3.5" />}
-                                        {cat}
-                                    </button>
-                                ))}
-                            </div>
+                            {categories.map(cat => (
+                                <button
+                                    key={cat}
+                                    onClick={() => setSelectedCategory(cat)}
+                                    className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-semibold whitespace-nowrap border transition-all ${
+                                        selectedCategory === cat 
+                                        ? 'bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.2)]' 
+                                        : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
+                                    }`}
+                                >
+                                    <Icon name={CATEGORY_ICONS[cat] || 'sparkles'} className="w-3.5 h-3.5" />
+                                    {cat}
+                                </button>
+                            ))}
                         </div>
 
-                        {/* Results Heading */}
-                        <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-4 border-b border-white/5 pb-8">
-                            <div className="text-left w-full">
-                                <h2 className="text-3xl font-bold tracking-tight mb-2">Intelligence Directory <span className="text-white/30 text-xl font-normal">({filteredTools.length} Resources)</span></h2>
-                                <p className="text-sm text-white/40">Real-time indexed AI services curated for modern agentic workflows.</p>
-                            </div>
+                        <div className="mb-12">
+                            <h2 className="text-4xl font-bold tracking-tight mb-2">Intelligence Directory <span className="text-white/20 text-2xl font-normal ml-2">({filteredTools.length})</span></h2>
+                            <p className="text-white/40 font-medium">Curated high-performance AI resources for modern automation.</p>
                         </div>
 
-                        {/* Tool Display */}
                         {viewMode === 'grid' ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                 {filteredTools.map(tool => (
-                                    <div key={tool.id} className="group relative bg-[#121214] border border-white/5 hover:border-white/20 transition-all duration-500 rounded-2xl overflow-hidden flex flex-col shadow-2xl hover:shadow-indigo-500/10 h-[380px]">
-                                        {/* Accent Glow */}
-                                        <div 
-                                            className="absolute top-0 right-0 w-32 h-32 blur-[60px] opacity-0 group-hover:opacity-10 transition-opacity pointer-events-none"
-                                            style={{ backgroundColor: tool.accent || '#fff' }}
-                                        ></div>
+                                    <div key={tool.id} className="tool-card group relative bg-[#121214] border border-white/5 hover:border-white/20 transition-all duration-500 rounded-2xl overflow-hidden flex flex-col shadow-2xl h-[400px]">
+                                        <div className="tool-card-glow" style={{ backgroundColor: tool.accent || '#4f46e5' }}></div>
 
                                         <div className="p-6 relative z-10 flex flex-col h-full text-left">
                                             <div className="flex justify-between items-start mb-4">
-                                                <span className="text-[10px] font-black text-white/60 bg-white/10 border border-white/10 px-2.5 py-1 rounded-md uppercase tracking-wider">
+                                                <span className="text-[9px] font-black text-white/50 bg-white/5 border border-white/10 px-2 py-1 rounded uppercase tracking-widest">
                                                     {tool.category}
                                                 </span>
-                                                <div className={`text-[10px] font-bold px-2 py-1 rounded-md uppercase border ${tool.n8nStatus === 'Native Node' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : 'bg-white/5 text-white/40 border-white/10'}`}>
+                                                <div className={`text-[9px] font-black px-2 py-1 rounded uppercase border ${tool.n8nStatus === 'Native Node' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : 'bg-white/5 text-white/30 border-white/10'}`}>
                                                     {tool.n8nStatus}
                                                 </div>
                                             </div>
 
-                                            <h3 className="text-lg font-bold mb-2 group-hover:text-indigo-300 transition-colors">{tool.name}</h3>
-                                            <p className="text-xs text-white/40 leading-relaxed line-clamp-3 mb-6 flex-grow">
+                                            <h3 className="text-xl font-bold mb-2 group-hover:text-indigo-300 transition-colors">{tool.name}</h3>
+                                            <p className="text-xs text-white/40 leading-relaxed line-clamp-3 mb-8">
                                                 {tool.description}
                                             </p>
                                             
-                                            <div className="space-y-3 mb-6 pt-6 border-t border-white/5">
-                                                <div className="flex items-center justify-between text-[11px] font-medium">
-                                                    <span className="text-white/30 uppercase tracking-widest flex items-center gap-2"><SafeIcon iconName="DollarSign" className="w-3 h-3" /> Cost</span>
-                                                    <span className="text-white/80 truncate ml-2 text-right">{tool.pricingDetail}</span>
+                                            <div className="mt-auto space-y-3 mb-6 pt-6 border-t border-white/5">
+                                                <div className="flex items-center justify-between text-[11px] font-bold">
+                                                    <span className="text-white/20 uppercase tracking-widest flex items-center gap-2"><Icon name="dollar-sign" className="w-3.5 h-3.5" /> Cost</span>
+                                                    <span className="text-white/80">{tool.pricingDetail}</span>
                                                 </div>
-                                                <div className="flex items-center justify-between text-[11px] font-medium">
-                                                    <span className="text-white/30 uppercase tracking-widest flex items-center gap-2"><SafeIcon iconName="Clock" className="w-3 h-3" /> Setup</span>
+                                                <div className="flex items-center justify-between text-[11px] font-bold">
+                                                    <span className="text-white/20 uppercase tracking-widest flex items-center gap-2"><Icon name="clock" className="w-3.5 h-3.5" /> Setup</span>
                                                     <span className="text-white/80">{tool.setupTime}</span>
                                                 </div>
                                             </div>
 
                                             <div className="flex gap-2">
-                                                <a href={tool.homeLink} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white/5 hover:bg-white text-white hover:text-black rounded-xl text-[10px] font-bold transition-all uppercase tracking-widest">
-                                                    WEBSITE <SafeIcon iconName="ArrowUpRight" className="w-3 h-3" />
+                                                <a href={tool.homeLink} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white/5 hover:bg-white text-white hover:text-black rounded-xl text-[10px] font-black transition-all uppercase tracking-widest border border-white/10">
+                                                    WEBSITE <Icon name="external-link" className="w-3 h-3" />
                                                 </a>
-                                                <a href={tool.docsLink} target="_blank" rel="noopener noreferrer" className="p-2.5 bg-white/5 hover:bg-white/20 border border-white/10 rounded-xl transition-all" title="Docs">
-                                                    <SafeIcon iconName="BookOpen" className="w-4 h-4 text-white/60" />
+                                                <a href={tool.docsLink} target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/20 border border-white/10 rounded-xl transition-all" title="Docs">
+                                                    <Icon name="book-open" className="w-4 h-4 text-white/50" />
                                                 </a>
-                                                <a href={tool.pricingLink} target="_blank" rel="noopener noreferrer" className="p-2.5 bg-white/5 hover:bg-white/20 border border-white/10 rounded-xl transition-all" title="Pricing">
-                                                    <SafeIcon iconName="DollarSign" className="w-4 h-4 text-white/60" />
+                                                <a href={tool.pricingLink} target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/20 border border-white/10 rounded-xl transition-all" title="Pricing">
+                                                    <Icon name="dollar-sign" className="w-4 h-4 text-white/50" />
                                                 </a>
                                             </div>
                                         </div>
@@ -312,47 +344,23 @@
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-left text-sm">
                                         <thead>
-                                            <tr className="border-b border-white/5 text-[10px] font-black uppercase tracking-[0.2em] text-white/30">
+                                            <tr className="border-b border-white/5 text-[10px] font-black uppercase tracking-widest text-white/20">
                                                 <th className="px-8 py-6">AI Resource</th>
                                                 <th className="px-6 py-6">Category</th>
                                                 <th className="px-6 py-6">Integration</th>
-                                                <th className="px-6 py-6">Cost Profile</th>
                                                 <th className="px-6 py-6 text-right">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-white/5">
                                             {filteredTools.map(tool => (
                                                 <tr key={tool.id} className="hover:bg-white/5 transition-colors group">
-                                                    <td className="px-8 py-5">
-                                                        <div className="flex items-center gap-4 text-left">
-                                                            <div className="w-10 h-10 rounded-xl border border-white/10 flex items-center justify-center font-bold text-xs bg-white/5 group-hover:border-indigo-500/50 group-hover:bg-indigo-500/10 transition-all">
-                                                                {tool.name.charAt(0)}
-                                                            </div>
-                                                            <div>
-                                                                <p className="font-bold text-white group-hover:text-indigo-300 transition-colors">{tool.name}</p>
-                                                                <p className="text-[10px] text-white/30 mt-0.5">{tool.hq}</p>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-5 text-left">
-                                                        <span className="text-[10px] font-bold uppercase text-white/40 border border-white/10 px-2 py-0.5 rounded">
-                                                            {tool.category}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-6 py-5 text-left">
-                                                        <span className={`text-[10px] font-bold uppercase ${tool.n8nStatus === 'Native Node' ? 'text-indigo-400' : 'text-white/20'}`}>
-                                                            {tool.n8nStatus}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-6 py-5 text-left">
-                                                        <p className="font-semibold text-xs text-white/70">{tool.pricingDetail}</p>
-                                                        <p className="text-[9px] text-white/20 italic">{tool.pricingModel}</p>
-                                                    </td>
+                                                    <td className="px-8 py-5 font-bold">{tool.name}</td>
+                                                    <td className="px-6 py-5 text-white/40 uppercase text-[10px] font-bold">{tool.category}</td>
+                                                    <td className="px-6 py-5 text-indigo-400 font-bold text-[10px] uppercase">{tool.n8nStatus}</td>
                                                     <td className="px-6 py-5 text-right">
-                                                        <div className="flex items-center justify-end gap-3 opacity-20 group-hover:opacity-100 transition-opacity">
-                                                            <a href={tool.homeLink} target="_blank" className="p-2 border border-white/10 rounded-lg hover:bg-white hover:text-black transition-all" title="Website"><SafeIcon iconName="ExternalLink" className="w-4 h-4" /></a>
-                                                            <a href={tool.docsLink} target="_blank" className="p-2 border border-white/10 rounded-lg hover:bg-white hover:text-black transition-all" title="Docs"><SafeIcon iconName="BookOpen" className="w-4 h-4" /></a>
-                                                            <a href={tool.pricingLink} target="_blank" className="p-2 border border-white/10 rounded-lg hover:bg-white hover:text-black transition-all" title="Pricing"><SafeIcon iconName="DollarSign" className="w-4 h-4" /></a>
+                                                        <div className="flex items-center justify-end gap-3">
+                                                            <a href={tool.homeLink} target="_blank" className="p-2 bg-white/5 border border-white/10 rounded-lg hover:bg-white hover:text-black transition-all"><Icon name="external-link" className="w-4 h-4" /></a>
+                                                            <a href={tool.docsLink} target="_blank" className="p-2 bg-white/5 border border-white/10 rounded-lg hover:bg-white hover:text-black transition-all"><Icon name="book-open" className="w-4 h-4" /></a>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -362,55 +370,18 @@
                                 </div>
                             </div>
                         )}
-
-                        {/* Knowledge Base */}
-                        <div className="mt-32 grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            <div className="relative group p-1 rounded-[32px] overflow-hidden bg-gradient-to-br from-white/10 to-transparent">
-                                <div className="bg-[#0a0a0c] p-10 rounded-[30px] h-full text-left">
-                                    <h4 className="text-2xl font-bold mb-6 flex items-center gap-3 italic">
-                                        <SafeIcon iconName="Sparkles" className="w-6 h-6 text-indigo-400" /> Automation Strategy
-                                    </h4>
-                                    <p className="text-white/40 text-sm leading-relaxed mb-8 font-medium">
-                                        When scaling complex AI flows, prioritize **Native Nodes** to minimize latency. For high-volume tasks like translation or summaries, routing to **DeepSeek** or **Gemini Flash** can reduce costs by up to 90% compared to GPT-4o.
-                                    </p>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div className="p-4 bg-white/5 border border-white/10 rounded-2xl">
-                                            <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-1">Optimization</p>
-                                            <p className="text-xs font-bold text-white/80 leading-snug italic">Use Firecrawl + Tavily together to build real-time memory for custom agents.</p>
-                                        </div>
-                                        <div className="p-4 bg-white/5 border border-white/10 rounded-2xl">
-                                            <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-1">Low Latency</p>
-                                            <p className="text-xs font-bold text-white/80 leading-snug italic">ElevenLabs Turbo-v2.5 is currently the fastest high-fidelity TTS for voice AI.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="bg-indigo-600 rounded-[32px] p-10 flex flex-col justify-between text-white relative overflow-hidden group text-left">
-                                 <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full -mr-32 -mt-32 blur-[100px] group-hover:scale-110 transition-transform duration-700"></div>
-                                 <div className="relative z-10">
-                                     <h4 className="text-3xl font-black mb-4">Suggest a Resource</h4>
-                                     <p className="text-indigo-100/60 text-base font-medium leading-relaxed max-w-md">
-                                         The AI landscape evolves daily. If we're missing a high-performance API or tool that optimizes your workflows, let us know.
-                                     </p>
-                                 </div>
-                                 <button className="relative z-10 mt-12 py-5 bg-white text-black font-black rounded-2xl hover:scale-[1.02] transition-all shadow-xl uppercase tracking-widest text-xs">
-                                     SUBMIT NEW TOOL
-                                 </button>
-                            </div>
-                        </div>
                     </main>
 
-                    <footer className="border-t border-white/5 bg-[#070708] py-20">
+                    <footer className="mt-40 border-t border-white/5 bg-[#070708] py-20">
                         <div className="max-w-7xl mx-auto px-6 text-center">
-                            <button onClick={handleLinkedInShare} className="mx-auto mb-8 flex items-center gap-2 px-8 py-4 bg-white/5 hover:bg-white text-white/60 hover:text-black border border-white/10 rounded-2xl font-bold transition-all uppercase tracking-widest text-xs">
-                                <SafeIcon iconName="Linkedin" className="w-4 h-4 fill-white group-hover:fill-black" /> Share Marketplace
+                            <button onClick={handleLinkedInShare} className="mx-auto mb-10 flex items-center gap-3 px-8 py-4 bg-white/5 hover:bg-white text-white/60 hover:text-black border border-white/10 rounded-2xl font-black transition-all uppercase tracking-widest text-[10px]">
+                                <Icon name="linkedin" className="w-4 h-4 fill-current" /> Share Intelligence Hub
                             </button>
-                            <div className="flex items-center justify-center gap-2 mb-4 opacity-40">
-                                <SafeIcon iconName="Cpu" className="w-4 h-4" />
-                                <span className="text-[10px] font-black tracking-[0.5em] uppercase">NEURAL HUB v2.6.0</span>
+                            <div className="flex items-center justify-center gap-3 opacity-20 mb-2">
+                                <Icon name="cpu" className="w-5 h-5" />
+                                <span className="text-[11px] font-black tracking-[0.4em] uppercase">NEURAL HUB v2.7.0</span>
                             </div>
-                            <p className="text-xs text-white/20 font-bold uppercase tracking-widest">Collaborative AI Directory &bull; April 2026 Edition</p>
+                            <p className="text-[10px] text-white/10 font-bold uppercase tracking-[0.2em]">Curated AI Directory &bull; April 2026 Edition</p>
                         </div>
                     </footer>
                 </div>
