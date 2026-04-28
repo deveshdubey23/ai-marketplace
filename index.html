@@ -93,8 +93,6 @@
         const Icon = ({ name, className = "w-4 h-4", strokeWidth = 2.5 }) => {
             const key = name.toLowerCase();
             const path = ICON_PATHS[key] || ICON_PATHS['sparkles'];
-            
-            // Special paths that need additional definitions (like search circle or clock hands)
             let extra = null;
             if (key === 'search') extra = <line x1="21" x2="16.65" y1="21" y2="16.65"></line>;
             if (key === 'clock') extra = <polyline points="12 6 12 12 16 14"></polyline>;
@@ -107,17 +105,8 @@
             if (key === 'globe') extra = <><path d="M2 12h20"></path><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></>;
 
             return (
-                <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={strokeWidth}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className={className}
-                >
-                    {path}
-                    {extra}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
+                    {path} {extra}
                 </svg>
             );
         };
@@ -131,20 +120,77 @@
         };
 
         const AI_TOOLS = [
+            // --- LLMs ---
             { id: 'openai', name: 'OpenAI (GPT-4o)', category: 'LLM', hq: 'USA', setupTime: '2m', pricingDetail: '$5/1M tokens', homeLink: 'https://openai.com/', docsLink: 'https://platform.openai.com/docs/', pricingLink: 'https://openai.com/pricing/', n8nStatus: 'Native Node', description: 'Industry standard for text, vision, and function calling.', accent: '#10a37f' },
             { id: 'anthropic', name: 'Anthropic Claude', category: 'LLM', hq: 'USA', setupTime: '3m', pricingDetail: '$3/1M (Sonnet)', homeLink: 'https://anthropic.com/', docsLink: 'https://docs.anthropic.com/', pricingLink: 'https://www.anthropic.com/pricing', n8nStatus: 'Native Node', description: 'Exceptional reasoning and long-context (200k+).', accent: '#d97757' },
             { id: 'google-gemini', name: 'Google Gemini', category: 'LLM', hq: 'USA', setupTime: '2m', pricingDetail: 'Free tiers', homeLink: 'https://aistudio.google.com/', docsLink: 'https://ai.google.dev/docs', pricingLink: 'https://ai.google.dev/pricing', n8nStatus: 'Native Node', description: 'Massive 2M+ context window and Google ecosystem integration.', accent: '#4285f4' },
             { id: 'mistral', name: 'Mistral AI', category: 'LLM', hq: 'France', setupTime: '2m', pricingDetail: '€2/1M (Large)', homeLink: 'https://mistral.ai/', docsLink: 'https://docs.mistral.ai/', pricingLink: 'https://mistral.ai/pricing/', n8nStatus: 'Native Node', description: 'Leading European high-efficiency open and proprietary models.', accent: '#fd533e' },
             { id: 'deepseek', name: 'DeepSeek V3', category: 'LLM', hq: 'China', setupTime: '1m', pricingDetail: '$0.14/1M tokens', homeLink: 'https://www.deepseek.com/', docsLink: 'https://api-docs.deepseek.com/', pricingLink: 'https://www.deepseek.com/', n8nStatus: 'HTTP Request', description: 'Extreme performance-to-price ratio LLM for logic tasks.', accent: '#615ced' },
+            { id: 'cohere', name: 'Cohere', category: 'LLM', hq: 'Canada', setupTime: '3m', pricingDetail: 'Usage-based', homeLink: 'https://cohere.com/', docsLink: 'https://docs.cohere.com/', pricingLink: 'https://cohere.com/pricing', n8nStatus: 'Native Node', description: 'Enterprise-grade LLM specifically focused on RAG and industrial tool-use.', accent: '#3b82f6' },
+            
+            // --- INFERENCE ---
             { id: 'groq', name: 'Groq', category: 'Inference', hq: 'USA', setupTime: '1m', pricingDetail: '$0.05/1M tokens', homeLink: 'https://groq.com/', docsLink: 'https://console.groq.com/docs/', pricingLink: 'https://groq.com/pricing/', n8nStatus: 'LangChain', description: 'Ultra-fast LPU inference for real-time agent responses.', accent: '#f55036' },
             { id: 'together', name: 'Together AI', category: 'Inference', hq: 'USA', setupTime: '2m', pricingDetail: 'Per token', homeLink: 'https://www.together.ai/', docsLink: 'https://docs.together.ai/', pricingLink: 'https://www.together.ai/pricing', n8nStatus: 'HTTP Request', description: 'Cloud for high-speed open-source model hosting.', accent: '#ffffff' },
             { id: 'replicate', name: 'Replicate', category: 'Inference', hq: 'USA', setupTime: '3m', pricingDetail: 'Per-second GPU', homeLink: 'https://replicate.com/', docsLink: 'https://replicate.com/docs', pricingLink: 'https://replicate.com/pricing', n8nStatus: 'Native Node', description: 'Deploy open-source AI models with one line of code.', accent: '#ffffff' },
+            { id: 'fireworks', name: 'Fireworks AI', category: 'Inference', hq: 'USA', setupTime: '2m', pricingDetail: 'Usage-based', homeLink: 'https://fireworks.ai/', docsLink: 'https://readme.fireworks.ai/', pricingLink: 'https://fireworks.ai/pricing', n8nStatus: 'HTTP Request', description: 'Production-ready inference for open models like Llama 3.', accent: '#e11d48' },
+
+            // --- AUDIO ---
             { id: 'elevenlabs', name: 'ElevenLabs', category: 'Audio', hq: 'Global', setupTime: '2m', pricingDetail: '$5/mo starter', homeLink: 'https://elevenlabs.io/', docsLink: 'https://elevenlabs.io/docs', pricingLink: 'https://elevenlabs.io/pricing', n8nStatus: 'Native Node', description: 'The gold standard for high-fidelity AI text-to-speech.', accent: '#ff8a00' },
-            { id: 'heygen', name: 'HeyGen', category: 'Video', hq: 'USA', setupTime: '5m', pricingDetail: '$29/mo starter', homeLink: 'https://www.heygen.com/', docsLink: 'https://docs.heygen.com/', pricingLink: 'https://www.heygen.com/pricing', n8nStatus: 'Native Node', description: 'AI avatars and high-quality video translation.', accent: '#ff4d4d' },
+            { id: 'deepgram', name: 'Deepgram', category: 'Audio', hq: 'USA', setupTime: '1m', pricingDetail: '$0.004/min', homeLink: 'https://deepgram.com/', docsLink: 'https://developers.deepgram.com/', pricingLink: 'https://deepgram.com/pricing', n8nStatus: 'HTTP Request', description: 'Fastest transcription and intelligence for audio data.', accent: '#13ef95' },
+            { id: 'assemblyai', name: 'AssemblyAI', category: 'Audio', hq: 'USA', setupTime: '2m', pricingDetail: '$0.65/hr', homeLink: 'https://www.assemblyai.com/', docsLink: 'https://www.assemblyai.com/docs', pricingLink: 'https://www.assemblyai.com/pricing', n8nStatus: 'HTTP Request', description: 'Speech-to-text with advanced AI audio analysis.', accent: '#6366f1' },
+            { id: 'suno', name: 'Suno AI', category: 'Audio', hq: 'USA', setupTime: '1m', pricingDetail: '$8/mo basic', homeLink: 'https://suno.com/', docsLink: 'https://www.google.com/search?q=suno+api+docs', pricingLink: 'https://suno.com/pricing', n8nStatus: 'HTTP Request', description: 'Studio-quality music and song generation.', accent: '#ff0055' },
+
+            // --- VIDEO ---
+            { id: 'heygen', name: 'HeyGen', category: 'Video', hq: 'USA', setupTime: '5m', pricingDetail: '$29/mo starter', homeLink: 'https://www.heygen.com/', docsLink: 'https://docs.heygen.com/reference', pricingLink: 'https://www.heygen.com/pricing', n8nStatus: 'Native Node', description: 'AI avatars and high-quality video translation.', accent: '#ff4d4d' },
+            { id: 'runway', name: 'Runway Gen-3', category: 'Video', hq: 'USA', setupTime: '5m', pricingDetail: '$12/mo std', homeLink: 'https://runwayml.com/', docsLink: 'https://help.runwayml.com/', pricingLink: 'https://runwayml.com/pricing', n8nStatus: 'HTTP Request', description: 'Cinematic AI video generation and world-class creative tools.', accent: '#ffffff' },
+            { id: 'luma', name: 'Luma Dream Machine', category: 'Video', hq: 'USA', setupTime: '2m', pricingDetail: '$29/mo Lite', homeLink: 'https://lumalabs.ai/', docsLink: 'https://lumalabs.ai/docs', pricingLink: 'https://lumalabs.ai/pricing', n8nStatus: 'HTTP Request', description: 'Hyper-realistic video generation from text and images.', accent: '#6366f1' },
+            { id: 'synthesia', name: 'Synthesia', category: 'Video', hq: 'UK', setupTime: '10m', pricingDetail: '$22/mo', homeLink: 'https://www.synthesia.io/', docsLink: 'https://docs.synthesia.io/', pricingLink: 'https://www.synthesia.io/pricing', n8nStatus: 'HTTP Request', description: 'Professional corporate video generation with AI avatars.', accent: '#2563eb' },
+
+            // --- WEB & SEARCH ---
             { id: 'firecrawl', name: 'Firecrawl', category: 'Web', hq: 'Global', setupTime: '2m', pricingDetail: '$19/mo', homeLink: 'https://www.firecrawl.dev/', docsLink: 'https://docs.firecrawl.dev/', pricingLink: 'https://www.firecrawl.dev/pricing', n8nStatus: 'Native Node', description: 'Convert any website into LLM-ready clean Markdown.', accent: '#eb5e28' },
             { id: 'tavily', name: 'Tavily Search', category: 'Search', hq: 'USA', setupTime: '1m', pricingDetail: '$0.01/call', homeLink: 'https://tavily.com/', docsLink: 'https://docs.tavily.com/', pricingLink: 'https://tavily.com/#pricing', n8nStatus: 'Native Node', description: 'Search engine optimized for LLM agent research.', accent: '#23d18c' },
-            { id: 'notion-ai', name: 'Notion AI', category: 'Productivity', hq: 'USA', setupTime: '1m', pricingDetail: '$10/mo addon', homeLink: 'https://www.notion.so/product/ai', docsLink: 'https://developers.notion.com/', pricingLink: 'https://www.notion.so/pricing', n8nStatus: 'Native Node', description: 'Integrated workspace AI for summarizing and writing.', accent: '#ffffff' },
-            { id: 'cursor', name: 'Cursor', category: 'Coding', hq: 'USA', setupTime: '2m', pricingDetail: '$20/mo Pro', homeLink: 'https://cursor.com/', docsLink: 'https://docs.cursor.com/', pricingLink: 'https://cursor.com/pricing', n8nStatus: 'Local IDE', description: 'The world\'s first AI-native code editor.', accent: '#3b82f6' }
+            { id: 'apify', name: 'Apify', category: 'Web', hq: 'EU', setupTime: '10m', pricingDetail: '$49/mo', homeLink: 'https://apify.com/', docsLink: 'https://docs.apify.com/', pricingLink: 'https://apify.com/pricing', n8nStatus: 'Native Node', description: 'The most comprehensive platform for web scraping.', accent: '#ff0000' },
+            { id: 'perplexity', name: 'Perplexity', category: 'Search', hq: 'USA', setupTime: '1m', pricingDetail: 'Free / Pro', homeLink: 'https://www.perplexity.ai/', docsLink: 'https://docs.perplexity.ai/', pricingLink: 'https://www.perplexity.ai/pro', n8nStatus: 'HTTP Request', description: 'Conversational search engine with real-time citations.', accent: '#1d9bf0' },
+
+            // --- CODING ---
+            { id: 'cursor', name: 'Cursor', category: 'Coding', hq: 'USA', setupTime: '2m', pricingDetail: '$20/mo Pro', homeLink: 'https://cursor.com/', docsLink: 'https://docs.cursor.com/', pricingLink: 'https://cursor.com/pricing', n8nStatus: 'Local IDE', description: 'The world\'s first AI-native code editor.', accent: '#3b82f6' },
+            { id: 'replit', name: 'Replit Agent', category: 'Coding', hq: 'USA', setupTime: '2m', pricingDetail: '$15/mo', homeLink: 'https://replit.com/', docsLink: 'https://docs.replit.com/', pricingLink: 'https://replit.com/pricing', n8nStatus: 'Web IDE', description: 'Build and deploy entire apps from natural language.', accent: '#f36d00' },
+            { id: 'codeium', name: 'Codeium', category: 'Coding', hq: 'USA', setupTime: '1m', pricingDetail: 'Generous Free', homeLink: 'https://codeium.com/', docsLink: 'https://codeium.com/docs', pricingLink: 'https://codeium.com/pricing', n8nStatus: 'Plugin', description: 'Ultra-fast AI coding assistant for all major IDEs.', accent: '#09b6a2' },
+
+            // --- IMAGES ---
+            { id: 'midjourney', name: 'Midjourney', category: 'Images', hq: 'USA', setupTime: '10m', pricingDetail: '$10/mo', homeLink: 'https://www.midjourney.com/', docsLink: 'https://docs.midjourney.com/', pricingLink: 'https://www.midjourney.com/showcase', n8nStatus: 'HTTP Request', description: 'Artistic state-of-the-art image generation.', accent: '#ffffff' },
+            { id: 'stability', name: 'Stability AI', category: 'Images', hq: 'UK', setupTime: '5m', pricingDetail: 'Usage-based', homeLink: 'https://stability.ai/', docsLink: 'https://platform.stability.ai/docs', pricingLink: 'https://stability.ai/pricing', n8nStatus: 'HTTP Request', description: 'Open-weights powerhouse for image and video generation.', accent: '#6366f1' },
+            { id: 'ideogram', name: 'Ideogram', category: 'Images', hq: 'Canada', setupTime: '1m', pricingDetail: 'Free / Paid', homeLink: 'https://ideogram.ai/', docsLink: 'https://ideogram.ai/api', pricingLink: 'https://ideogram.ai/pricing', n8nStatus: 'HTTP Request', description: 'Best-in-class typography and realistic image generation.', accent: '#ffffff' },
+
+            // --- DATA & VECTOR ---
+            { id: 'pinecone', name: 'Pinecone', category: 'Data', hq: 'USA', setupTime: '5m', pricingDetail: '$0.08/GB', homeLink: 'https://www.pinecone.io/', docsLink: 'https://docs.pinecone.io/', pricingLink: 'https://www.pinecone.io/pricing/', n8nStatus: 'Native Node', description: 'Managed vector database for industrial AI search.', accent: '#23d18c' },
+            { id: 'weaviate', name: 'Weaviate', category: 'Data', hq: 'EU', setupTime: '10m', pricingDetail: 'Managed starts $25', homeLink: 'https://weaviate.io/', docsLink: 'https://weaviate.io/developers/weaviate', pricingLink: 'https://weaviate.io/pricing', n8nStatus: 'Native Node', description: 'Multi-modal open-source vector database.', accent: '#00a3ff' },
+            { id: 'qdrant', name: 'Qdrant', category: 'Data', hq: 'Germany', setupTime: '10m', pricingDetail: 'Managed available', homeLink: 'https://qdrant.tech/', docsLink: 'https://qdrant.tech/documentation/', pricingLink: 'https://qdrant.tech/pricing/', n8nStatus: 'Native Node', description: 'High-performance vector database in Rust.', accent: '#ff0000' },
+
+            // --- MARKETING ---
+            { id: 'jasper', name: 'Jasper AI', category: 'Marketing', hq: 'USA', setupTime: '5m', pricingDetail: '$39/mo', homeLink: 'https://www.jasper.ai/', docsLink: 'https://developers.jasper.ai/', pricingLink: 'https://www.jasper.ai/pricing', n8nStatus: 'HTTP Request', description: 'Enterprise-grade AI content and campaign platform.', accent: '#4f46e5' },
+            { id: 'copyai', name: 'Copy.ai', category: 'Marketing', hq: 'USA', setupTime: '3m', pricingDetail: '$36/mo', homeLink: 'https://www.copy.ai/', docsLink: 'https://docs.copy.ai/', pricingLink: 'https://www.copy.ai/pricing', n8nStatus: 'HTTP Request', description: 'GTM automation and AI writing for large teams.', accent: '#10a37f' },
+            { id: 'writesonic', name: 'Writesonic', category: 'Marketing', hq: 'USA', setupTime: '2m', pricingDetail: '$12/mo', homeLink: 'https://writesonic.com/', docsLink: 'https://docs.writesonic.com/', pricingLink: 'https://writesonic.com/pricing', n8nStatus: 'HTTP Request', description: 'AI platform for SEO-optimized content and blogs.', accent: '#0052ff' },
+
+            // --- PRODUCTIVITY ---
+            { id: 'notion', name: 'Notion AI', category: 'Productivity', hq: 'USA', setupTime: '1m', pricingDetail: '$10/mo addon', homeLink: 'https://www.notion.so/', docsLink: 'https://developers.notion.com/', pricingLink: 'https://www.notion.so/pricing', n8nStatus: 'Native Node', description: 'Integrated workspace AI for summarizing and writing.', accent: '#ffffff' },
+            { id: 'mem', name: 'Mem AI', category: 'Productivity', hq: 'USA', setupTime: '2m', pricingDetail: '$8/mo', homeLink: 'https://mem.ai/', docsLink: 'https://docs.mem.ai/', pricingLink: 'https://mem.ai/pricing', n8nStatus: 'HTTP Request', description: 'AI-powered knowledge management and personal CRM.', accent: '#e11d48' },
+            { id: 'gamma', name: 'Gamma', category: 'Productivity', hq: 'USA', setupTime: '1m', pricingDetail: 'Free / $8/mo', homeLink: 'https://gamma.app/', docsLink: 'https://gamma.app/api', pricingLink: 'https://gamma.app/pricing', n8nStatus: 'HTTP Request', description: 'Generate slides and docs from simple text prompts.', accent: '#9333ea' },
+
+            // --- SALES ---
+            { id: 'clay', name: 'Clay', category: 'Sales', hq: 'USA', setupTime: '10m', pricingDetail: '$149/mo', homeLink: 'https://www.clay.com/', docsLink: 'https://docs.clay.com/', pricingLink: 'https://www.clay.com/pricing', n8nStatus: 'HTTP Request', description: 'Ultimate AI sales enrichment and outreach platform.', accent: '#ff4d4d' },
+            { id: 'gong', name: 'Gong AI', category: 'Sales', hq: 'USA', setupTime: '30m', pricingDetail: 'Enterprise', homeLink: 'https://www.gong.io/', docsLink: 'https://developer.gong.io/', pricingLink: 'https://www.gong.io/pricing/', n8nStatus: 'HTTP Request', description: 'Revenue intelligence and conversation analysis for sales.', accent: '#7c3aed' },
+            
+            // --- SECURITY ---
+            { id: 'vanta', name: 'Vanta', category: 'Security', hq: 'USA', setupTime: '30m', pricingDetail: 'Enterprise', homeLink: 'https://www.vanta.com/', docsLink: 'https://developer.vanta.com/', pricingLink: 'https://www.vanta.com/pricing', n8nStatus: 'HTTP Request', description: 'Automated compliance and trust management platform.', accent: '#6d28d9' },
+            { id: 'snyk', name: 'Snyk AI', category: 'Security', hq: 'Global', setupTime: '10m', pricingDetail: 'Usage-based', homeLink: 'https://snyk.io/', docsLink: 'https://docs.snyk.io/', pricingLink: 'https://snyk.io/pricing/', n8nStatus: 'HTTP Request', description: 'Developer-first security with AI code analysis.', accent: '#4c4a73' },
+
+            // --- TRANSLATION ---
+            { id: 'deepl', name: 'DeepL', category: 'Translation', hq: 'Germany', setupTime: '1m', pricingDetail: '€4.99 + usage', homeLink: 'https://www.deepl.com/', docsLink: 'https://www.deepl.com/docs-api', pricingLink: 'https://www.deepl.com/pro-api', n8nStatus: 'Native Node', description: 'The worlds most accurate neural machine translation.', accent: '#0f2b46' },
+
+            // --- DEV TOOLS ---
+            { id: 'langsmith', name: 'LangChain (LangSmith)', category: 'DevTools', hq: 'USA', setupTime: '5m', pricingDetail: 'Free / Usage', homeLink: 'https://www.langchain.com/', docsLink: 'https://docs.smith.langchain.com/', pricingLink: 'https://www.langchain.com/pricing', n8nStatus: 'LangChain', description: 'Observability and debugging for LLM applications.', accent: '#22c55e' },
+            { id: 'wandb', name: 'Weights & Biases', category: 'DevTools', hq: 'USA', setupTime: '15m', pricingDetail: 'Free / Usage', homeLink: 'https://wandb.ai/', docsLink: 'https://docs.wandb.ai/', pricingLink: 'https://wandb.ai/pricing', n8nStatus: 'HTTP Request', description: 'Developer platform for machine learning and AI tracking.', accent: '#ffcc33' }
         ];
 
         const App = () => {
@@ -319,7 +365,7 @@
                             </button>
                             <div className="flex items-center justify-center gap-3 opacity-20 mb-2">
                                 <Icon name="cpu" className="w-5 h-5" />
-                                <span className="text-[11px] font-black tracking-[0.4em] uppercase">NEURAL HUB v2.8.0</span>
+                                <span className="text-[11px] font-black tracking-[0.4em] uppercase">NEURAL HUB v2.9.0</span>
                             </div>
                             <p className="text-[10px] text-white/10 font-bold uppercase tracking-[0.2em]">Curated AI Directory &bull; April 2026 Edition</p>
                         </div>
