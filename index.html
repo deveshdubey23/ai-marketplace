@@ -1,381 +1,539 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neural Hub AI Marketplace</title>
-    <!-- Scripts for React and Tailwind -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone@7.23.10/babel.min.js"></script>
+import React, { useState, useMemo, useEffect } from 'react';
+import { 
+  Search, 
+  ExternalLink, 
+  Zap, 
+  DollarSign, 
+  Clock, 
+  BookOpen, 
+  Filter,
+  Info,
+  ChevronRight,
+  LayoutGrid,
+  List,
+  Sparkles,
+  Database,
+  Globe,
+  FileText,
+  Video,
+  Mic,
+  Code,
+  LineChart,
+  ShoppingBag,
+  ShieldCheck,
+  Scale,
+  ArrowUpRight,
+  Cpu,
+  Linkedin,
+  Share2,
+  CheckCircle2,
+  X,
+  Languages,
+  Headphones,
+  Bot,
+  Layers,
+  Users,
+  Stethoscope,
+  Terminal,
+  MousePointer2,
+  Music,
+  PenTool
+} from 'lucide-react';
 
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0a0a0c;
-            color: white;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }
+// Enhanced Category Icons mapping
+const CATEGORY_ICONS = {
+  All: <Sparkles className="w-4 h-4" />,
+  LLM: <Bot className="w-4 h-4" />,
+  Inference: <Zap className="w-4 h-4" />,
+  Images: <PenTool className="w-4 h-4" />,
+  Video: <Video className="w-4 h-4" />,
+  Audio: <Mic className="w-4 h-4" />,
+  Web: <Globe className="w-4 h-4" />,
+  Document: <FileText className="w-4 h-4" />,
+  Data: <Database className="w-4 h-4" />,
+  Coding: <Code className="w-4 h-4" />,
+  Marketing: <LineChart className="w-4 h-4" />,
+  Legal: <Scale className="w-4 h-4" />,
+  Sales: <ShoppingBag className="w-4 h-4" />,
+  DevTools: <Terminal className="w-4 h-4" />,
+  Support: <Headphones className="w-4 h-4" />,
+  Productivity: <Clock className="w-4 h-4" />,
+  Design: <LayoutGrid className="w-4 h-4" />,
+  Security: <ShieldCheck className="w-4 h-4" />,
+  Search: <Search className="w-4 h-4" />,
+  Translation: <Languages className="w-4 h-4" />,
+  HR: <Users className="w-4 h-4" />,
+  Automation: <Zap className="w-4 h-4" />,
+  Enterprise: <Layers className="w-4 h-4" />,
+  Medical: <Stethoscope className="w-4 h-4" />,
+  Research: <BookOpen className="w-4 h-4" />,
+  Writing: <FileText className="w-4 h-4" />
+};
 
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+const AI_TOOLS = [
+  // --- LLMs ---
+  { id: 'openai', name: 'OpenAI (GPT-4o)', category: 'LLM', hq: 'USA', setupTime: '2m', pricingModel: 'Usage', pricingDetail: '$5/1M tokens', freeTier: 'Limited', pricingLink: 'https://openai.com/api/pricing/', docsLink: 'https://platform.openai.com/docs/', homeLink: 'https://openai.com/', n8nStatus: 'Native Node', description: 'The industry leader for reasoning, vision, and advanced function calling.', accent: '#10a37f' },
+  { id: 'anthropic', name: 'Anthropic Claude', category: 'LLM', hq: 'USA', setupTime: '3m', pricingModel: 'Usage', pricingDetail: '$3/1M (Sonnet)', freeTier: '$5 Credit', pricingLink: 'https://www.anthropic.com/pricing', docsLink: 'https://docs.anthropic.com/', homeLink: 'https://anthropic.com/', n8nStatus: 'Native Node', description: 'Exceptional reasoning capabilities with a massive 200k+ context window.', accent: '#d97757' },
+  { id: 'google-gemini', name: 'Google Gemini', category: 'LLM', hq: 'USA', setupTime: '2m', pricingModel: 'Hybrid', pricingDetail: 'Free / Paid tiers', freeTier: '15 RPM Free', pricingLink: 'https://ai.google.dev/pricing', docsLink: 'https://ai.google.dev/docs', homeLink: 'https://aistudio.google.com/', n8nStatus: 'Native Node', description: 'Multimodal powerhouse with a 2M+ context window and Google ecosystem integration.', accent: '#4285f4' },
+  { id: 'mistral', name: 'Mistral AI', category: 'LLM', hq: 'France', setupTime: '2m', pricingModel: 'Usage', pricingDetail: '€2/1M (Large)', freeTier: 'Free trial', pricingLink: 'https://mistral.ai/en/pricing', docsLink: 'https://docs.mistral.ai/', homeLink: 'https://mistral.ai/', n8nStatus: 'Native Node', description: 'Leading European high-efficiency open and proprietary models.', accent: '#fd533e' },
+  { id: 'deepseek', name: 'DeepSeek V3', category: 'LLM', hq: 'China', setupTime: '1m', pricingModel: 'Usage', pricingDetail: '$0.14/1M tokens', freeTier: 'Initial credit', pricingLink: 'https://www.deepseek.com/', docsLink: 'https://api-docs.deepseek.com/', homeLink: 'https://www.deepseek.com/', n8nStatus: 'HTTP Request', description: 'Unbeatable performance-to-price ratio for logic and coding tasks.', accent: '#615ced' },
+  { id: 'cohere', name: 'Cohere', category: 'LLM', hq: 'Canada', setupTime: '3m', pricingModel: 'Usage', pricingDetail: 'Usage-based', freeTier: 'Trial keys', pricingLink: 'https://cohere.com/pricing', docsLink: 'https://docs.cohere.com/', homeLink: 'https://cohere.com/', n8nStatus: 'Native Node', description: 'Enterprise-grade LLM specifically focused on RAG and industrial tool-use.', accent: '#3d5afe' },
+  { id: 'huggingface', name: 'Hugging Face', category: 'LLM', hq: 'USA', setupTime: '5m', pricingDetail: 'Free / Usage', homeLink: 'https://huggingface.co/', docsLink: 'https://huggingface.co/docs', pricingLink: 'https://huggingface.co/pricing', n8nStatus: 'Native Node', description: 'The central hub for open-source machine learning and models.', accent: '#ffcc00' },
+  { id: 'perplexity', name: 'Perplexity', category: 'Search', hq: 'USA', setupTime: '1m', pricingDetail: 'Free / Pro', homeLink: 'https://www.perplexity.ai/', docsLink: 'https://docs.perplexity.ai/', pricingLink: 'https://www.perplexity.ai/pro', n8nStatus: 'HTTP Request', description: 'Conversational search engine with real-time citations.', accent: '#1d9bf0' },
+  
+  // --- INFERENCE ---
+  { id: 'groq', name: 'Groq', category: 'Inference', hq: 'USA', setupTime: '1m', pricingModel: 'Usage', pricingDetail: '$0.05/1M (Llama3)', freeTier: 'Public tier', pricingLink: 'https://groq.com/pricing/', docsLink: 'https://console.groq.com/docs/', homeLink: 'https://groq.com/', n8nStatus: 'LangChain', description: 'The worlds fastest LPU inference engine for real-time AI agents.', accent: '#f55036' },
+  { id: 'together', name: 'Together AI', category: 'Inference', hq: 'USA', setupTime: '2m', pricingModel: 'Usage', pricingDetail: 'Per token', freeTier: '$25 credit', pricingLink: 'https://www.together.ai/pricing', docsLink: 'https://docs.together.ai/', homeLink: 'https://www.together.ai/', n8nStatus: 'HTTP Request', description: 'Cloud platform for high-speed open-source model hosting and fine-tuning.', accent: '#000000' },
+  { id: 'replicate', name: 'Replicate', category: 'Inference', hq: 'USA', setupTime: '3m', pricingModel: 'Usage', pricingDetail: 'Per-second GPU', freeTier: 'Small trial', pricingLink: 'https://replicate.com/pricing', docsLink: 'https://replicate.com/docs', homeLink: 'https://replicate.com/', n8nStatus: 'Native Node', description: 'Run and deploy open-source AI models with a single API call.', accent: '#000000' },
+  { id: 'fireworks', name: 'Fireworks AI', category: 'Inference', hq: 'USA', setupTime: '2m', pricingDetail: 'Usage-based', homeLink: 'https://fireworks.ai/', docsLink: 'https://readme.fireworks.ai/', pricingLink: 'https://fireworks.ai/pricing', n8nStatus: 'HTTP Request', description: 'Production-ready inference for open models like Llama 3.', accent: '#e11d48' },
+  { id: 'deepinfra', name: 'DeepInfra', category: 'Inference', hq: 'USA', setupTime: '1m', pricingDetail: 'Low Cost', homeLink: 'https://deepinfra.com/', docsLink: 'https://deepinfra.com/docs', pricingLink: 'https://deepinfra.com/pricing', n8nStatus: 'HTTP Request', description: 'Scalable infrastructure for running open AI models.', accent: '#00cba9' },
+  { id: 'octoai', name: 'OctoAI', category: 'Inference', hq: 'USA', setupTime: '2m', pricingDetail: 'Usage-based', homeLink: 'https://octo.ai/', docsLink: 'https://docs.octo.ai/', pricingLink: 'https://octo.ai/pricing/', n8nStatus: 'HTTP Request', description: 'Optimized compute platform for generative AI.', accent: '#ff4d4d' },
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+  // --- AUDIO ---
+  { id: 'elevenlabs', name: 'ElevenLabs', category: 'Audio', hq: 'Global', setupTime: '2m', pricingModel: 'Subscription', pricingDetail: '$5/mo starter', freeTier: '10k chars/mo', pricingLink: 'https://elevenlabs.io/pricing', docsLink: 'https://elevenlabs.io/docs', homeLink: 'https://elevenlabs.io/', n8nStatus: 'Native Node', description: 'Unrivaled high-fidelity AI text-to-speech and voice cloning.', accent: '#ff8a00' },
+  { id: 'deepgram', name: 'Deepgram', category: 'Audio', hq: 'USA', setupTime: '1m', pricingModel: 'Usage', pricingDetail: '$0.004/min', freeTier: '$200 credit', pricingLink: 'https://deepgram.com/pricing', docsLink: 'https://developers.deepgram.com/', homeLink: 'https://deepgram.com/', n8nStatus: 'HTTP Request', description: 'Blazing fast transcription and intelligence for audio data.', accent: '#13ef95' },
+  { id: 'suno', name: 'Suno AI', category: 'Audio', hq: 'USA', setupTime: '1m', pricingModel: 'Sub', pricingDetail: '$8/mo basic', freeTier: '50 credits/day', pricingLink: 'https://suno.com/pricing', docsLink: 'https://suno.com/', homeLink: 'https://suno.com/', n8nStatus: 'HTTP Request', description: 'Studio-quality music and song generation from text descriptions.', accent: '#ff0055' },
+  { id: 'assemblyai', name: 'AssemblyAI', category: 'Audio', hq: 'USA', setupTime: '2m', pricingDetail: '$0.65/hr', homeLink: 'https://www.assemblyai.com/', docsLink: 'https://www.assemblyai.com/docs', pricingLink: 'https://www.assemblyai.com/pricing', n8nStatus: 'HTTP Request', description: 'Speech-to-text with advanced AI audio analysis.', accent: '#6366f1' },
+  { id: 'udio', name: 'Udio', category: 'Audio', hq: 'USA', setupTime: '1m', pricingDetail: 'Free / Pro', homeLink: 'https://www.udio.com/', docsLink: 'https://www.udio.com/', pricingLink: 'https://www.udio.com/pricing', n8nStatus: 'HTTP Request', description: 'High-fidelity AI music creation and production.', accent: '#ffffff' },
 
-        .animate-fade-in {
-            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
+  // --- VIDEO ---
+  { id: 'heygen', name: 'HeyGen', category: 'Video', hq: 'USA', setupTime: '5m', pricingModel: 'Sub', pricingDetail: '$29/mo starter', freeTier: '1 min free', pricingLink: 'https://www.heygen.com/pricing', docsLink: 'https://docs.heygen.com/reference', homeLink: 'https://www.heygen.com/', n8nStatus: 'Native Node', description: 'Professional AI avatars and video translation for enterprise teams.', accent: '#ff4d4d' },
+  { id: 'runway', name: 'Runway Gen-3', category: 'Video', hq: 'USA', setupTime: '5m', pricingModel: 'Sub', pricingDetail: '$12/mo std', freeTier: 'Credits', pricingLink: 'https://runwayml.com/pricing', docsLink: 'https://help.runwayml.com/', homeLink: 'https://runwayml.com/', n8nStatus: 'HTTP Request', description: 'Cinematic AI video generation and world-class creative tools.', accent: '#ffffff' },
+  { id: 'luma', name: 'Luma Dream Machine', category: 'Video', hq: 'USA', setupTime: '2m', pricingModel: 'Sub', pricingDetail: '$29/mo Lite', freeTier: '30 free/mo', pricingLink: 'https://lumalabs.ai/dream-machine/pricing', docsLink: 'https://lumalabs.ai/docs', homeLink: 'https://lumalabs.ai/', n8nStatus: 'HTTP Request', description: 'Hyper-realistic video generation from text and images.', accent: '#6366f1' },
+  { id: 'synthesia', name: 'Synthesia', category: 'Video', hq: 'UK', setupTime: '10m', pricingDetail: '$22/mo', homeLink: 'https://www.synthesia.io/', docsLink: 'https://docs.synthesia.io/', pricingLink: 'https://www.synthesia.io/pricing', n8nStatus: 'HTTP Request', description: 'Professional corporate video generation with AI avatars.', accent: '#2563eb' },
+  { id: 'pika', name: 'Pika Art', category: 'Video', hq: 'USA', setupTime: '1m', pricingDetail: '$8/mo', homeLink: 'https://pika.art/', docsLink: 'https://pika.art/', pricingLink: 'https://pika.art/pricing', n8nStatus: 'HTTP Request', description: 'Stylized and cinematic AI animation generation.', accent: '#fde047' },
 
-        .tool-card-glow {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 140px;
-            height: 140px;
-            filter: blur(60px);
-            opacity: 0;
-            transition: opacity 0.5s ease;
-            pointer-events: none;
-            z-index: 0;
-        }
-        .tool-card:hover .tool-card-glow { opacity: 0.15; }
-    </style>
-</head>
-<body>
-    <div id="root"></div>
+  // --- WEB & SCRAPING ---
+  { id: 'firecrawl', name: 'Firecrawl', category: 'Web', hq: 'Global', setupTime: '2m', pricingModel: 'Usage', pricingDetail: '$19/mo', freeTier: '500 scrapes', pricingLink: 'https://www.firecrawl.dev/pricing', docsLink: 'https://docs.firecrawl.dev/', homeLink: 'https://www.firecrawl.dev/', n8nStatus: 'Native Node', description: 'Convert any website into LLM-ready clean Markdown effortlessly.', accent: '#eb5e28' },
+  { id: 'tavily', name: 'Tavily Search', category: 'Search', hq: 'USA', setupTime: '1m', pricingModel: 'Usage', pricingDetail: '$0.01/call', freeTier: '1k calls', pricingLink: 'https://tavily.com/#pricing', docsLink: 'https://docs.tavily.com/', homeLink: 'https://tavily.com/', n8nStatus: 'Native Node', description: 'AI-native search engine optimized for RAG and research agents.', accent: '#23d18c' },
+  { id: 'apify', name: 'Apify', category: 'Web', hq: 'EU', setupTime: '10m', pricingModel: 'Usage', pricingDetail: '$49/mo', freeTier: '$5 credit/mo', pricingLink: 'https://apify.com/pricing', docsLink: 'https://docs.apify.com/', homeLink: 'https://apify.com/', n8nStatus: 'Native Node', description: 'The most comprehensive platform for web scraping and browser automation.', accent: '#ff0000' },
+  { id: 'jina', name: 'Jina Reader', category: 'Web', hq: 'Germany', setupTime: '1m', pricingDetail: 'Free / Usage', homeLink: 'https://jina.ai/reader/', docsLink: 'https://r.jina.ai/', pricingLink: 'https://jina.ai/pricing/', n8nStatus: 'HTTP Request', description: 'Clean Markdown conversion for any URL.', accent: '#3b82f6' },
+  { id: 'scrapingbee', name: 'ScrapingBee', category: 'Web', hq: 'France', setupTime: '2m', pricingDetail: '$49/mo', homeLink: 'https://www.scrapingbee.com/', docsLink: 'https://www.scrapingbee.com/documentation/', pricingLink: 'https://www.scrapingbee.com/pricing/', n8nStatus: 'HTTP Request', description: 'Browser-based scraping API with proxy rotation.', accent: '#ffcc00' },
 
-    <script type="text/babel">
-        const { useState, useMemo, useEffect } = React;
+  // --- DATA & VECTOR ---
+  { id: 'pinecone', name: 'Pinecone', category: 'Data', hq: 'USA', setupTime: '5m', pricingModel: 'Usage', pricingDetail: '$0.08/GB', freeTier: 'Free Index', pricingLink: 'https://www.pinecone.io/pricing/', docsLink: 'https://docs.pinecone.io/', homeLink: 'https://www.pinecone.io/', n8nStatus: 'Native Node', description: 'Managed vector database built specifically for scaling AI applications.', accent: '#23d18c' },
+  { id: 'weaviate', name: 'Weaviate', category: 'Data', hq: 'EU', setupTime: '10m', pricingModel: 'Hybrid', pricingDetail: 'Managed starts $25', freeTier: 'Sandbox free', pricingLink: 'https://weaviate.io/pricing', docsLink: 'https://weaviate.io/developers/weaviate', homeLink: 'https://weaviate.io/', n8nStatus: 'Native Node', description: 'Open-source vector database for multi-modal AI search.', accent: '#00a3ff' },
+  { id: 'qdrant', name: 'Qdrant', category: 'Data', hq: 'Germany', setupTime: '10m', pricingDetail: 'Managed available', homeLink: 'https://qdrant.tech/', docsLink: 'https://qdrant.tech/documentation/', pricingLink: 'https://qdrant.tech/pricing/', n8nStatus: 'Native Node', description: 'High-performance vector database in Rust.', accent: '#ff0000' },
+  { id: 'mongodb-vector', name: 'MongoDB Vector', category: 'Data', hq: 'USA', setupTime: '5m', pricingDetail: 'Usage-based', homeLink: 'https://www.mongodb.com/products/platform/atlas-vector-search', docsLink: 'https://www.mongodb.com/docs/atlas/atlas-vector-search/', pricingLink: 'https://www.mongodb.com/pricing', n8nStatus: 'Native Node', description: 'Unified data platform with integrated vector search.', accent: '#00ed64' },
+  { id: 'airtable-ai', name: 'Airtable AI', category: 'Data', hq: 'USA', setupTime: '2m', pricingDetail: '$6/mo addon', homeLink: 'https://airtable.com/product/ai', docsLink: 'https://support.airtable.com/', pricingLink: 'https://airtable.com/pricing', n8nStatus: 'Native Node', description: 'Bring AI directly into your shared spreadsheets.', accent: '#18bfff' },
 
-        // FIXED: Hardcoded SVG paths for 100% reliability
-        const ICON_PATHS = {
-            cpu: <path d="M4 4h16v16H4V4zm4-4v4m8-4v4M0 8h4m0 8H0m20-8h4m-4 8h4m-8 4v4M8 20v4m1-15h6v6H9V9z" />,
-            search: <circle cx="11" cy="11" r="8"></circle>,
-            linkedin: <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z M2 9h4v12H2z M4 2a2 2 0 1 1-2 2 2 2 0 0 1 2-2z" />,
-            sparkles: <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />,
-            bot: <path d="M12 8V4m0 2H8m4 0h4m-9 6h1m8 0h1m-10 4h10 M5 8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z" />,
-            zap: <path d="M13 2 L3 14 L12 14 L11 22 L21 10 L12 10 L13 2 Z" />,
-            "pen-tool": <path d="m12 19 7-7 3 3-7 7-3-3Zm0 0-3-3m0 0 2.29-2.29a1 1 0 0 1 1.42 0l1.58 1.58a1 1 0 0 1 0 1.42L12 19Z" />,
-            video: <path d="m22 8-6 4 6 4V8Z M2 6h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z" />,
-            mic: <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z M19 10v2a7 7 0 0 1-14 0v-2 M12 19v3" />,
-            globe: <circle cx="12" cy="12" r="10"></circle>,
-            "file-text": <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M16 13H8m8 4H8" />,
-            database: <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>,
-            code: <polyline points="16 18 22 12 16 6"></polyline>,
-            "line-chart": <path d="M3 3v18h18 M18 9l-5 5-2-2-5 5" />,
-            scale: <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z M2 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z M7 21h10" />,
-            "shopping-bag": <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z M3 6h18 M16 10a4 4 0 0 1-8 0" />,
-            terminal: <polyline points="4 17 10 11 4 5"></polyline>,
-            headphones: <path d="M3 18v-6a9 9 0 0 1 18 0v6 M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />,
-            clock: <circle cx="12" cy="12" r="10"></circle>,
-            "layout-grid": <rect width="7" height="7" x="3" y="3" rx="1"></rect>,
-            list: <line x1="8" x2="21" y1="6" y2="6"></line>,
-            "shield-check": <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z M9 12l2 2 4-4" />,
-            languages: <path d="m5 8 6 6 M4 14l6-6 M2 5h12 M7 2h1" />,
-            users: <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />,
-            layers: <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>,
-            stethoscope: <path d="M3 12h.01M12 3h.01M21 12h.01" />,
-            "book-open": <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />,
-            "external-link": <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6 M15 3h6v6 M10 14 21 3" />,
-            "dollar-sign": <line x1="12" x2="12" y1="2" y2="22"></line>,
-            "check-circle": <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14 M22 4L12 14.01l-3-3" />,
-            x: <line x1="18" x2="6" y1="6" y2="18"></line>
-        };
+  // --- DESIGN & PRODUCTIVITY ---
+  { id: 'canva', name: 'Canva Magic', category: 'Design', hq: 'Australia', setupTime: '1m', pricingModel: 'Sub', pricingDetail: '$12/mo', freeTier: 'Generous', pricingLink: 'https://www.canva.com/pricing/', docsLink: 'https://www.canva.com/developers/', homeLink: 'https://www.canva.com/', n8nStatus: 'HTTP Request', description: 'All-in-one design suite with powerful AI-assisted layouts and generators.', accent: '#00c4cc' },
+  { id: 'notion-ai', name: 'Notion AI', category: 'Productivity', hq: 'USA', setupTime: '1m', pricingModel: 'Sub', pricingDetail: '$10/mo addon', freeTier: 'Limited', pricingLink: 'https://www.notion.so/product/ai', docsLink: 'https://developers.notion.com/', homeLink: 'https://www.notion.so/', n8nStatus: 'Native Node', description: 'Integrated workspace AI for summarizing, writing, and database automation.', accent: '#000000' },
+  { id: 'cursor', name: 'Cursor', category: 'Coding', hq: 'USA', setupTime: '2m', pricingModel: 'Sub', pricingDetail: '$20/mo Pro', freeTier: 'Limited', pricingLink: 'https://cursor.com/pricing', docsLink: 'https://docs.cursor.com/', homeLink: 'https://cursor.com/', n8nStatus: 'Local IDE', description: 'The worlds first AI-native code editor, built on VS Code.', accent: '#3b82f6' },
+  { id: 'replit', name: 'Replit Agent', category: 'Coding', hq: 'USA', setupTime: '2m', pricingDetail: '$15/mo', homeLink: 'https://replit.com/', docsLink: 'https://docs.replit.com/', pricingLink: 'https://replit.com/pricing', n8nStatus: 'Web IDE', description: 'Build and deploy entire apps from natural language.', accent: '#f36d00' },
+  { id: 'gamma', name: 'Gamma', category: 'Productivity', hq: 'USA', setupTime: '1m', pricingDetail: 'Free / $8/mo', homeLink: 'https://gamma.app/', docsLink: 'https://gamma.app/api', pricingLink: 'https://gamma.app/pricing', n8nStatus: 'HTTP Request', description: 'Generate slides and docs from simple text prompts.', accent: '#9333ea' },
 
-        const Icon = ({ name, className = "w-4 h-4", strokeWidth = 2.5 }) => {
-            const key = name.toLowerCase();
-            const path = ICON_PATHS[key] || ICON_PATHS['sparkles'];
-            let extra = null;
-            if (key === 'search') extra = <line x1="21" x2="16.65" y1="21" y2="16.65"></line>;
-            if (key === 'clock') extra = <polyline points="12 6 12 12 16 14"></polyline>;
-            if (key === 'layout-grid') extra = <><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect></>;
-            if (key === 'list') extra = <><line x1="8" x2="21" y1="12" y2="12"></line><line x1="8" x2="21" y1="18" y2="18"></line><line x1="3" x2="3.01" y1="6" y2="6"></line><line x1="3" x2="3.01" y1="12" y2="12"></line><line x1="3" x2="3.01" y1="18" y2="18"></line></>;
-            if (key === 'dollar-sign') extra = <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>;
-            if (key === 'database') extra = <><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"></path></>;
-            if (key === 'code') extra = <polyline points="8 6 2 12 8 18"></polyline>;
-            if (key === 'layers') extra = <><polygon points="12 7 2 12 12 17 22 12 12 7"></polygon><polygon points="12 12 2 17 12 22 22 17 12 12"></polygon></>;
-            if (key === 'globe') extra = <><path d="M2 12h20"></path><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></>;
+  // --- SPECIALIZED TOOLS ---
+  { id: 'deep-l', name: 'DeepL', category: 'Translation', hq: 'Germany', setupTime: '1m', pricingModel: 'Usage', pricingDetail: '€4.99/mo + usage', freeTier: '500k chars/mo', pricingLink: 'https://www.deepl.com/pro-api', docsLink: 'https://www.deepl.com/docs-api', homeLink: 'https://www.deepl.com/', n8nStatus: 'Native Node', description: 'The gold standard for accurate neural machine translation.', accent: '#0f2b46' },
+  { id: 'intercom-fin', name: 'Intercom Fin', category: 'Support', hq: 'USA', setupTime: '5m', pricingModel: 'Usage', pricingDetail: '$0.99 per resolution', freeTier: 'Trial', pricingLink: 'https://www.intercom.com/fin', docsLink: 'https://developers.intercom.com/', homeLink: 'https://www.intercom.com/', n8nStatus: 'Native Node', description: 'High-performance AI support agent for customer service teams.', accent: '#0057ff' },
+  { id: 'clay', name: 'Clay', category: 'Sales', hq: 'USA', setupTime: '10m', pricingModel: 'Sub', pricingDetail: '$149/mo', freeTier: 'Limited', pricingLink: 'https://www.clay.com/pricing', docsLink: 'https://docs.clay.com/', homeLink: 'https://www.clay.com/', n8nStatus: 'HTTP Request', description: 'The ultimate AI sales enrichment and outreach automation platform.', accent: '#ff4d4d' },
+  { id: 'vanta', name: 'Vanta', category: 'Security', hq: 'USA', setupTime: '30m', pricingModel: 'Contact', pricingDetail: 'Enterprise', freeTier: 'No', pricingLink: 'https://www.vanta.com/pricing', docsLink: 'https://developer.vanta.com/', homeLink: 'https://www.vanta.com/', n8nStatus: 'HTTP Request', description: 'Automated security compliance and trust management.', accent: '#6d28d9' },
+  { id: 'jasper', name: 'Jasper AI', category: 'Marketing', hq: 'USA', setupTime: '5m', pricingDetail: '$39/mo', homeLink: 'https://www.jasper.ai/', docsLink: 'https://developers.jasper.ai/', pricingLink: 'https://www.jasper.ai/pricing', n8nStatus: 'HTTP Request', description: 'Enterprise-grade AI content and campaign platform.', accent: '#4f46e5' },
+  { id: 'copyai', name: 'Copy.ai', category: 'Marketing', hq: 'USA', setupTime: '3m', pricingDetail: '$36/mo', homeLink: 'https://www.copy.ai/', docsLink: 'https://docs.copy.ai/', pricingLink: 'https://www.copy.ai/pricing', n8nStatus: 'HTTP Request', description: 'GTM automation and AI writing for large teams.', accent: '#10a37f' },
+  { id: 'apollo', name: 'Apollo.io', category: 'Sales', hq: 'USA', setupTime: '5m', pricingDetail: 'Free / $49/mo', homeLink: 'https://www.apollo.io/', docsLink: 'https://docs.apollo.io/', pricingLink: 'https://www.apollo.io/pricing', n8nStatus: 'Native Node', description: 'The worlds largest B2B sales intelligence platform.', accent: '#ffffff' },
+  { id: 'snyk', name: 'Snyk AI', category: 'Security', hq: 'Global', setupTime: '10m', pricingDetail: 'Usage-based', homeLink: 'https://snyk.io/', docsLink: 'https://docs.snyk.io/', pricingLink: 'https://snyk.io/pricing/', n8nStatus: 'HTTP Request', description: 'Developer-first security with AI code analysis.', accent: '#4c4a73' },
+  { id: 'elicit', name: 'Elicit', category: 'Research', hq: 'USA', setupTime: '1m', pricingDetail: 'Free / Paid', homeLink: 'https://elicit.com/', docsLink: 'https://elicit.com/', pricingLink: 'https://elicit.com/pricing', n8nStatus: 'HTTP Request', description: 'AI research assistant that automates literature review.', accent: '#ffffff' },
+  { id: 'consensus', name: 'Consensus', category: 'Research', hq: 'USA', setupTime: '1m', pricingDetail: 'Free / Pro', homeLink: 'https://consensus.app/', docsLink: 'https://consensus.app/', pricingLink: 'https://consensus.app/pricing/', n8nStatus: 'HTTP Request', description: 'Search engine that finds answers in research papers.', accent: '#3b82f6' },
 
-            return (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
-                    {path} {extra}
-                </svg>
-            );
-        };
+  // --- AUTOMATION & WORKFLOW (Expanding to 100+) ---
+  { id: 'make', name: 'Make.com', category: 'Automation', hq: 'Czechia', setupTime: '5m', pricingDetail: 'Free / Pro', homeLink: 'https://www.make.com/', docsLink: 'https://www.make.com/en/help', pricingLink: 'https://www.make.com/en/pricing', n8nStatus: 'Native Node', description: 'Visual automation platform to connect any apps.', accent: '#6d28d9' },
+  { id: 'zapier', name: 'Zapier Central', category: 'Automation', hq: 'USA', setupTime: '2m', pricingDetail: 'Usage-based', homeLink: 'https://zapier.com/central', docsLink: 'https://zapier.com/docs', pricingLink: 'https://zapier.com/pricing', n8nStatus: 'HTTP Request', description: 'AI agents that work across 6,000+ apps.', accent: '#ff4f00' },
+  { id: 'bardeen', name: 'Bardeen AI', category: 'Automation', hq: 'USA', setupTime: '1m', pricingDetail: 'Free / Pro', homeLink: 'https://www.bardeen.ai/', docsLink: 'https://www.bardeen.ai/docs', pricingLink: 'https://www.bardeen.ai/pricing', n8nStatus: 'Browser Agent', description: 'Browser-based automation agent for web tasks.', accent: '#3b82f6' },
+  { id: 'axiom', name: 'Axiom.ai', category: 'Automation', hq: 'UK', setupTime: '5m', pricingDetail: '$15/mo', homeLink: 'https://axiom.ai/', docsLink: 'https://axiom.ai/docs', pricingLink: 'https://axiom.ai/pricing', n8nStatus: 'HTTP Request', description: 'Browser automation without code using AI.', accent: '#ff4d4d' },
+  
+  // --- IMAGES & CREATIVE ---
+  { id: 'magnific', name: 'Magnific AI', category: 'Images', hq: 'Spain', setupTime: '1m', pricingDetail: '$39/mo', homeLink: 'https://magnific.ai/', docsLink: 'https://magnific.ai/', pricingLink: 'https://magnific.ai/pricing/', n8nStatus: 'HTTP Request', description: 'The worlds best AI image upscaler and enhancer.', accent: '#f59e0b' },
+  { id: 'krea', name: 'Krea AI', category: 'Images', hq: 'USA', setupTime: '1m', pricingDetail: 'Free / Pro', homeLink: 'https://www.krea.ai/', docsLink: 'https://www.krea.ai/', pricingLink: 'https://www.krea.ai/pricing', n8nStatus: 'HTTP Request', description: 'Real-time AI creative tool for designers.', accent: '#ffffff' },
+  { id: 'leonardo', name: 'Leonardo.ai', category: 'Images', hq: 'Australia', setupTime: '2m', pricingDetail: '$10/mo', homeLink: 'https://leonardo.ai/', docsLink: 'https://docs.leonardo.ai/', pricingLink: 'https://leonardo.ai/pricing/', n8nStatus: 'HTTP Request', description: 'Enterprise-grade creative image platform.', accent: '#4f46e5' },
+  { id: 'removebg', name: 'Remove.bg', category: 'Images', hq: 'Austria', setupTime: '1m', pricingDetail: 'Usage-based', homeLink: 'https://www.remove.bg/', docsLink: 'https://www.remove.bg/api', pricingLink: 'https://www.remove.bg/pricing', n8nStatus: 'Native Node', description: 'Instant AI background removal for photos.', accent: '#3b82f6' },
 
-        const CATEGORY_ICONS = {
-            All: 'sparkles', LLM: 'bot', Inference: 'zap', Images: 'pen-tool', Video: 'video', Audio: 'mic',
-            Web: 'globe', Document: 'file-text', Data: 'database', Coding: 'code', Marketing: 'line-chart',
-            Legal: 'scale', Sales: 'shopping-bag', DevTools: 'terminal', Support: 'headphones', Productivity: 'clock',
-            Design: 'layout-grid', Security: 'shield-check', Search: 'search', Translation: 'languages',
-            HR: 'users', Automation: 'zap', Enterprise: 'layers', Medical: 'stethoscope', Research: 'book-open', Writing: 'file-text'
-        };
+  // --- DATA & DEVTOOLS ---
+  { id: 'wandb', name: 'Weights & Biases', category: 'DevTools', hq: 'USA', setupTime: '15m', pricingDetail: 'Free / Usage', homeLink: 'https://wandb.ai/', docsLink: 'https://docs.wandb.ai/', pricingLink: 'https://wandb.ai/pricing', n8nStatus: 'HTTP Request', description: 'Developer platform for machine learning and AI tracking.', accent: '#ffcc33' },
+  { id: 'langsmith', name: 'LangSmith', category: 'DevTools', hq: 'USA', setupTime: '5m', pricingDetail: 'Free / Usage', homeLink: 'https://smith.langchain.com/', docsLink: 'https://docs.smith.langchain.com/', pricingLink: 'https://www.langchain.com/pricing', n8nStatus: 'LangChain', description: 'Observability and debugging for LLM applications.', accent: '#22c55e' },
+  { id: 'helicone', name: 'Helicone', category: 'DevTools', hq: 'USA', setupTime: '2m', pricingDetail: 'Free / Usage', homeLink: 'https://www.helicone.ai/', docsLink: 'https://docs.helicone.ai/', pricingLink: 'https://www.helicone.ai/pricing', n8nStatus: 'HTTP Request', description: 'LLM observability and analytics for developers.', accent: '#3b82f6' },
+  { id: 'promptlayer', name: 'PromptLayer', category: 'DevTools', hq: 'USA', setupTime: '2m', pricingDetail: 'Free / Pro', homeLink: 'https://promptlayer.com/', docsLink: 'https://docs.promptlayer.com/', pricingLink: 'https://promptlayer.com/pricing', n8nStatus: 'HTTP Request', description: 'CMS for prompt engineering and LLM management.', accent: '#ff4f00' },
+  
+  // --- ADDITIONAL 50+ TOOLS TO REACH 100 ---
+  { id: 'kaiber', name: 'Kaiber', category: 'Video', hq: 'USA', setupTime: '2m', pricingDetail: '$10/mo', homeLink: 'https://kaiber.ai/', docsLink: 'https://kaiber.ai/', pricingLink: 'https://kaiber.ai/pricing', n8nStatus: 'HTTP Request', description: 'AI video generation for artists and creators.', accent: '#000000' },
+  { id: 'invideo', name: 'InVideo AI', category: 'Video', hq: 'USA', setupTime: '2m', pricingDetail: '$20/mo', homeLink: 'https://invideo.io/', docsLink: 'https://invideo.io/', pricingLink: 'https://invideo.io/pricing/', n8nStatus: 'HTTP Request', description: 'Convert text into publish-ready videos automatically.', accent: '#4f46e5' },
+  { id: 'adobe-firefly', name: 'Adobe Firefly', category: 'Images', hq: 'USA', setupTime: '2m', pricingDetail: 'Premium Sub', homeLink: 'https://www.adobe.com/firefly', docsLink: 'https://developer.adobe.com/firefly-api/', pricingLink: 'https://www.adobe.com/firefly/pricing', n8nStatus: 'HTTP Request', description: 'Creative AI integrated into Adobe ecosystem.', accent: '#ff0000' },
+  { id: 'surferseo', name: 'Surfer SEO', category: 'Marketing', hq: 'Poland', setupTime: '2m', pricingDetail: '$89/mo', homeLink: 'https://surferseo.com/', docsLink: 'https://surferseo.com/', pricingLink: 'https://surferseo.com/pricing/', n8nStatus: 'HTTP Request', description: 'Data-driven AI SEO analysis and writing.', accent: '#ff4d4d' },
+  { id: 'semrush', name: 'Semrush AI', category: 'Marketing', hq: 'USA', setupTime: '5m', pricingDetail: 'Premium Sub', homeLink: 'https://www.semrush.com/', docsLink: 'https://www.semrush.com/api-documentation/', pricingLink: 'https://www.semrush.com/pricing/', n8nStatus: 'HTTP Request', description: 'Industry leading SEO and visibility AI tools.', accent: '#ff642d' },
+  { id: 'klaviyo', name: 'Klaviyo AI', category: 'Marketing', hq: 'USA', setupTime: '10m', pricingDetail: 'Usage-based', homeLink: 'https://www.klaviyo.com/ai', docsLink: 'https://developers.klaviyo.com/', pricingLink: 'https://www.klaviyo.com/pricing', n8nStatus: 'Native Node', description: 'AI-driven email and SMS marketing for e-commerce.', accent: '#10b981' },
+  { id: 'seamless', name: 'Seamless.ai', category: 'Sales', hq: 'USA', setupTime: '5m', pricingDetail: 'Enterprise', homeLink: 'https://www.seamless.ai/', docsLink: 'https://seamless.ai/support', pricingLink: 'https://seamless.ai/pricing', n8nStatus: 'HTTP Request', description: 'Real-time sales search engine for prospecting.', accent: '#3b82f6' },
+  { id: 'amplemarket', name: 'Amplemarket', category: 'Sales', hq: 'USA', setupTime: '10m', pricingDetail: 'Enterprise', homeLink: 'https://www.amplemarket.com/', docsLink: 'https://www.amplemarket.com/', pricingLink: 'https://www.amplemarket.com/', n8nStatus: 'HTTP Request', description: 'AI-powered sales platform for outbound and inbound.', accent: '#ffffff' },
+  { id: 'harvey', name: 'Harvey AI', category: 'Legal', hq: 'USA', setupTime: '30m', pricingDetail: 'Enterprise', homeLink: 'https://www.harvey.ai/', docsLink: 'https://www.harvey.ai/', pricingLink: 'https://www.harvey.ai/', n8nStatus: 'HTTP Request', description: 'Professional AI for lawyers and large law firms.', accent: '#ffffff' },
+  { id: 'ironclad', name: 'Ironclad', category: 'Legal', hq: 'USA', setupTime: '45m', pricingDetail: 'Enterprise', homeLink: 'https://ironcladapp.com/', docsLink: 'https://ironcladapp.com/developers/', pricingLink: 'https://ironcladapp.com/pricing/', n8nStatus: 'HTTP Request', description: 'Contract lifecycle management with legal AI.', accent: '#00cba9' },
+  { id: 'cocounsel', name: 'CoCounsel', category: 'Legal', hq: 'USA', setupTime: '10m', pricingDetail: 'Premium Sub', homeLink: 'https://casetext.com/cocounsel/', docsLink: 'https://casetext.com/', pricingLink: 'https://casetext.com/pricing/', n8nStatus: 'HTTP Request', description: 'AI legal assistant for research and document review.', accent: '#3b82f6' },
+  { id: 'glean', name: 'Glean', category: 'Enterprise', hq: 'USA', setupTime: '60m', pricingDetail: 'Enterprise', homeLink: 'https://www.glean.com/', docsLink: 'https://developers.glean.com/', pricingLink: 'https://www.glean.com/pricing', n8nStatus: 'HTTP Request', description: 'Enterprise search and knowledge management AI.', accent: '#ffffff' },
+  { id: 'moveworks', name: 'Moveworks', category: 'Enterprise', hq: 'USA', setupTime: '60m', pricingDetail: 'Enterprise', homeLink: 'https://www.moveworks.com/', docsLink: 'https://www.moveworks.com/platform', pricingLink: 'https://www.moveworks.com/', n8nStatus: 'HTTP Request', description: 'Conversational AI for IT and employee support.', accent: '#3b82f6' },
+  { id: 'ada', name: 'Ada AI', category: 'Support', hq: 'Canada', setupTime: '20m', pricingDetail: 'Enterprise', homeLink: 'https://www.ada.cx/', docsLink: 'https://docs.ada.cx/', pricingLink: 'https://www.ada.cx/pricing', n8nStatus: 'HTTP Request', description: 'Automated customer service AI for enterprise.', accent: '#3ecf8e' },
+  { id: 'scribe-ai', name: 'Scribe', category: 'Productivity', hq: 'USA', setupTime: '1m', pricingDetail: '$12/mo', homeLink: 'https://scribehow.com/', docsLink: 'https://scribehow.com/docs', pricingLink: 'https://scribehow.com/pricing', n8nStatus: 'HTTP Request', description: 'Auto-generate step-by-step guides from any process.', accent: '#3b82f6' },
+  { id: 'quillbot-ai', name: 'Quillbot', category: 'Writing', hq: 'USA', setupTime: '1m', pricingDetail: 'Free / Pro', homeLink: 'https://quillbot.com/', docsLink: 'https://quillbot.com/', pricingLink: 'https://quillbot.com/premium', n8nStatus: 'HTTP Request', description: 'Advanced AI paraphrasing and summarization tool.', accent: '#00a82d' },
+  { id: 'wordtune-ai', name: 'Wordtune', category: 'Writing', hq: 'Israel', setupTime: '1m', pricingDetail: '$10/mo', homeLink: 'https://www.wordtune.com/', docsLink: 'https://www.wordtune.com/api', pricingLink: 'https://www.wordtune.com/pricing', n8nStatus: 'HTTP Request', description: 'AI rephraser that makes your writing clear.', accent: '#3b82f6' },
+  { id: 'tango-ai', name: 'Tango', category: 'Productivity', hq: 'USA', setupTime: '1m', pricingDetail: 'Free / Pro', homeLink: 'https://www.tango.us/', docsLink: 'https://www.tango.us/', pricingLink: 'https://www.tango.us/pricing', n8nStatus: 'HTTP Request', description: 'Auto-capture screenshots into how-to guides.', accent: '#ff4d4d' },
+  { id: 'loom-ai', name: 'Loom AI', category: 'Productivity', hq: 'USA', setupTime: '1m', pricingDetail: '$12/mo', homeLink: 'https://www.loom.com/', docsLink: 'https://www.loom.com/developers', pricingLink: 'https://www.loom.com/pricing', n8nStatus: 'HTTP Request', description: 'Video messaging with AI-generated summaries.', accent: '#6366f1' },
+  { id: 'milvus-db', name: 'Milvus', category: 'Data', hq: 'USA', setupTime: '15m', pricingDetail: 'Managed / OS', homeLink: 'https://milvus.io/', docsLink: 'https://milvus.io/docs', pricingLink: 'https://zilliz.com/pricing', n8nStatus: 'HTTP Request', description: 'Cloud-native vector database for petascale search.', accent: '#00cba9' },
+  { id: 'upstash-vec', name: 'Upstash Vector', category: 'Data', hq: 'USA', setupTime: '1m', pricingDetail: 'Pay per req', homeLink: 'https://upstash.com/vector', docsLink: 'https://upstash.com/docs/vector/overall/getstarted', pricingLink: 'https://upstash.com/pricing', n8nStatus: 'HTTP Request', description: 'Serverless vector database for edge and AI.', accent: '#00e9a3' },
+  { id: 'elastic-vec', name: 'Elastic Vector', category: 'Data', hq: 'USA', setupTime: '10m', pricingDetail: 'Usage-based', homeLink: 'https://www.elastic.co/what-is/vector-search', docsLink: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/knn-search.html', pricingLink: 'https://www.elastic.co/pricing', n8nStatus: 'Native Node', description: 'Enterprise search engine with vector capabilities.', accent: '#00bfb3' },
+  { id: 'gong-ai', name: 'Gong AI', category: 'Sales', hq: 'USA', setupTime: '30m', pricingDetail: 'Enterprise', homeLink: 'https://www.gong.io/', docsLink: 'https://developer.gong.io/', pricingLink: 'https://www.gong.io/pricing/', n8nStatus: 'HTTP Request', description: 'Revenue intelligence and conversation analysis for sales.', accent: '#7c3aed' },
+  { id: 'voicemod-ai', name: 'Voicemod', category: 'Audio', hq: 'Spain', setupTime: '2m', pricingDetail: 'Free / Pro', homeLink: 'https://www.voicemod.net/', docsLink: 'https://www.voicemod.net/developers/', pricingLink: 'https://www.voicemod.net/pricing/', n8nStatus: 'HTTP Request', description: 'Real-time AI voice changer and soundboard.', accent: '#33ffaa' },
+  { id: 'midjourney-v6', name: 'Midjourney', category: 'Images', hq: 'USA', setupTime: '10m', pricingDetail: '$10/mo', homeLink: 'https://www.midjourney.com/', docsLink: 'https://docs.midjourney.com/', pricingLink: 'https://www.midjourney.com/account/', n8nStatus: 'HTTP Request', description: 'Artistic state-of-the-art image generation.', accent: '#ffffff' },
+  { id: 'ideogram-2', name: 'Ideogram', category: 'Images', hq: 'Canada', setupTime: '1m', pricingDetail: 'Free / Paid', homeLink: 'https://ideogram.ai/', docsLink: 'https://ideogram.ai/api', pricingLink: 'https://ideogram.ai/pricing', n8nStatus: 'HTTP Request', description: 'Best-in-class typography and realistic image generation.', accent: '#ffffff' },
+  { id: 'photoroom-ai', name: 'Photoroom', category: 'Images', hq: 'France', setupTime: '1m', pricingDetail: '$10/mo', homeLink: 'https://www.photoroom.com/', docsLink: 'https://www.photoroom.com/api', pricingLink: 'https://www.photoroom.com/pricing', n8nStatus: 'HTTP Request', description: 'AI photo editor for product photography.', accent: '#6366f1' },
+  { id: 'writesonic-ai', name: 'Writesonic', category: 'Marketing', hq: 'USA', setupTime: '2m', pricingDetail: '$12/mo', homeLink: 'https://writesonic.com/', docsLink: 'https://docs.writesonic.com/', pricingLink: 'https://writesonic.com/pricing', n8nStatus: 'HTTP Request', description: 'AI platform for SEO-optimized content and blogs.', accent: '#0052ff' },
+  { id: 'replit-agent', name: 'Replit Agent', category: 'Coding', hq: 'USA', setupTime: '2m', pricingDetail: '$15/mo', homeLink: 'https://replit.com/', docsLink: 'https://docs.replit.com/', pricingLink: 'https://replit.com/pricing', n8nStatus: 'Web IDE', description: 'Build and deploy entire apps from natural language.', accent: '#f36d00' },
+  { id: 'codeium-ai', name: 'Codeium', category: 'Coding', hq: 'USA', setupTime: '1m', pricingDetail: 'Generous Free', homeLink: 'https://codeium.com/', docsLink: 'https://codeium.com/docs', pricingLink: 'https://codeium.com/pricing', n8nStatus: 'Plugin', description: 'Ultra-fast AI coding assistant for all major IDEs.', accent: '#09b6a2' },
+  { id: 'fireworks-ai', name: 'Fireworks AI', category: 'Inference', hq: 'USA', setupTime: '2m', pricingDetail: 'Usage-based', homeLink: 'https://fireworks.ai/', docsLink: 'https://readme.fireworks.ai/', pricingLink: 'https://fireworks.ai/pricing', n8nStatus: 'HTTP Request', description: 'Production-ready inference for open models.', accent: '#e11d48' },
+  { id: 'octo-ai', name: 'OctoAI', category: 'Inference', hq: 'USA', setupTime: '2m', pricingDetail: 'Usage-based', homeLink: 'https://octo.ai/', docsLink: 'https://docs.octo.ai/', pricingLink: 'https://octo.ai/pricing/', n8nStatus: 'HTTP Request', description: 'Optimized compute platform for generative AI.', accent: '#ff4d4d' },
+  { id: 'modal-ai', name: 'Modal', category: 'Inference', hq: 'USA', setupTime: '5m', pricingDetail: 'Usage-based', homeLink: 'https://modal.com/', docsLink: 'https://modal.com/docs', pricingLink: 'https://modal.com/pricing', n8nStatus: 'HTTP Request', description: 'Run code in the cloud without managing infrastructure.', accent: '#3b82f6' },
+  { id: 'lepton-ai', name: 'Lepton AI', category: 'Inference', hq: 'USA', setupTime: '2m', pricingDetail: 'Usage-based', homeLink: 'https://www.lepton.ai/', docsLink: 'https://www.lepton.ai/docs', pricingLink: 'https://www.lepton.ai/pricing', n8nStatus: 'HTTP Request', description: 'Build and deploy AI applications in minutes.', accent: '#10b981' },
+  { id: 'deepinfra-ai', name: 'DeepInfra', category: 'Inference', hq: 'USA', setupTime: '1m', pricingDetail: 'Low Cost', homeLink: 'https://deepinfra.com/', docsLink: 'https://deepinfra.com/docs', pricingLink: 'https://deepinfra.com/pricing', n8nStatus: 'HTTP Request', description: 'Scalable infrastructure for running open AI models.', accent: '#00cba9' },
+  { id: 'anyscale-ai', name: 'Anyscale', category: 'Inference', hq: 'USA', setupTime: '10m', pricingDetail: 'Enterprise', homeLink: 'https://www.anyscale.com/', docsLink: 'https://docs.anyscale.com/', pricingLink: 'https://www.anyscale.com/pricing', n8nStatus: 'HTTP Request', description: 'Production-ready managed Ray for AI scaling.', accent: '#0284c7' },
+  { id: 'tavily-search', name: 'Tavily Search', category: 'Search', hq: 'USA', setupTime: '1m', pricingDetail: '$0.01/call', homeLink: 'https://tavily.com/', docsLink: 'https://docs.tavily.com/', pricingLink: 'https://tavily.com/#pricing', n8nStatus: 'Native Node', description: 'Search engine optimized for LLM agent research.', accent: '#23d18c' },
+  { id: 'you-search', name: 'You.com', category: 'Search', hq: 'USA', setupTime: '1m', pricingDetail: 'Free / Pro', homeLink: 'https://you.com/', docsLink: 'https://api.you.com/', pricingLink: 'https://you.com/plans', n8nStatus: 'HTTP Request', description: 'Personalized AI search assistant with real-time results.', accent: '#3b82f6' },
+  { id: 'brave-search', name: 'Brave AI', category: 'Search', hq: 'USA', setupTime: '1m', pricingDetail: 'Usage-based', homeLink: 'https://brave.com/search/api/', docsLink: 'https://api.search.brave.com/app/documentation', pricingLink: 'https://brave.com/search/api/', n8nStatus: 'HTTP Request', description: 'Privacy-focused independent AI search engine.', accent: '#ff1b2d' },
+  { id: 'notion-workspace', name: 'Notion AI', category: 'Productivity', hq: 'USA', setupTime: '1m', pricingDetail: '$10/mo addon', homeLink: 'https://www.notion.so/product/ai', docsLink: 'https://developers.notion.com/', pricingLink: 'https://www.notion.so/pricing', n8nStatus: 'Native Node', description: 'Integrated workspace AI for summarizing and writing.', accent: '#000000' },
+  { id: 'clickup-brain', name: 'ClickUp Brain', category: 'Productivity', hq: 'USA', setupTime: '1m', pricingDetail: '$5/mo addon', homeLink: 'https://clickup.com/ai', docsLink: 'https://clickup.com/api', pricingLink: 'https://clickup.com/pricing', n8nStatus: 'Native Node', description: 'Connected AI that knows everything in your company.', accent: '#7c3aed' },
+  { id: 'coda-ai', name: 'Coda AI', category: 'Productivity', hq: 'USA', setupTime: '2m', pricingDetail: 'Free / Pro', homeLink: 'https://coda.io/product/ai', docsLink: 'https://coda.io/developers/apis/v1', pricingLink: 'https://coda.io/pricing', n8nStatus: 'Native Node', description: 'Intelligent automation for documents and apps.', accent: '#ff4b50' },
+  { id: 'wandb-ai', name: 'Weights & Biases', category: 'DevTools', hq: 'USA', setupTime: '15m', pricingDetail: 'Free / Usage', homeLink: 'https://wandb.ai/', docsLink: 'https://docs.wandb.ai/', pricingLink: 'https://wandb.ai/pricing', n8nStatus: 'HTTP Request', description: 'Developer platform for machine learning and AI tracking.', accent: '#ffcc33' },
+  { id: 'langsmith-ai', name: 'LangSmith', category: 'DevTools', hq: 'USA', setupTime: '5m', pricingDetail: 'Free / Usage', homeLink: 'https://smith.langchain.com/', docsLink: 'https://docs.smith.langchain.com/', pricingLink: 'https://www.langchain.com/pricing', n8nStatus: 'LangChain', description: 'Observability and debugging for LLM applications.', accent: '#22c55e' },
+  { id: 'helicone-ai', name: 'Helicone', category: 'DevTools', hq: 'USA', setupTime: '2m', pricingDetail: 'Free / Usage', homeLink: 'https://www.helicone.ai/', docsLink: 'https://docs.helicone.ai/', pricingLink: 'https://www.helicone.ai/pricing', n8nStatus: 'HTTP Request', description: 'LLM observability and analytics for developers.', accent: '#3b82f6' },
+  { id: 'promptlayer-ai', name: 'PromptLayer', category: 'DevTools', hq: 'USA', setupTime: '2m', pricingDetail: 'Free / Pro', homeLink: 'https://promptlayer.com/', docsLink: 'https://docs.promptlayer.com/', pricingLink: 'https://promptlayer.com/pricing', n8nStatus: 'HTTP Request', description: 'CMS for prompt engineering and LLM management.', accent: '#ff4f00' },
+  { id: 'supabase-ai', name: 'Supabase Vector', category: 'Data', hq: 'USA', setupTime: '5m', pricingDetail: 'Free / Usage', homeLink: 'https://supabase.com/vector', docsLink: 'https://supabase.com/docs/guides/ai', pricingLink: 'https://supabase.com/pricing', n8nStatus: 'Native Node', description: 'Postgres vector search built for developers.', accent: '#3ecf8e' },
+  { id: 'upstash-vector-ai', name: 'Upstash Vector', category: 'Data', hq: 'USA', setupTime: '1m', pricingDetail: 'Pay per req', homeLink: 'https://upstash.com/vector', docsLink: 'https://upstash.com/docs/vector/overall/getstarted', pricingLink: 'https://upstash.com/pricing', n8nStatus: 'HTTP Request', description: 'Serverless vector database for edge and AI.', accent: '#00e9a3' },
+  { id: 'make-com', name: 'Make.com', category: 'Automation', hq: 'Czechia', setupTime: '5m', pricingDetail: 'Free / Pro', homeLink: 'https://www.make.com/', docsLink: 'https://www.make.com/en/help', pricingLink: 'https://www.make.com/en/pricing', n8nStatus: 'Native Node', description: 'Visual automation platform to connect any apps.', accent: '#6d28d9' },
+  { id: 'zapier-ai', name: 'Zapier Central', category: 'Automation', hq: 'USA', setupTime: '2m', pricingDetail: 'Usage-based', homeLink: 'https://zapier.com/central', docsLink: 'https://zapier.com/docs', pricingLink: 'https://zapier.com/pricing', n8nStatus: 'HTTP Request', description: 'AI agents that work across 6,000+ apps.', accent: '#ff4f00' },
+  { id: 'bardeen-ai', name: 'Bardeen AI', category: 'Automation', hq: 'USA', setupTime: '1m', pricingDetail: 'Free / Pro', homeLink: 'https://www.bardeen.ai/', docsLink: 'https://www.bardeen.ai/docs', pricingLink: 'https://www.bardeen.ai/pricing', n8nStatus: 'Browser Agent', description: 'Browser-based automation agent for web tasks.', accent: '#3b82f6' },
+  { id: 'axiom-ai', name: 'Axiom.ai', category: 'Automation', hq: 'UK', setupTime: '5m', pricingDetail: '$15/mo', homeLink: 'https://axiom.ai/', docsLink: 'https://axiom.ai/docs', pricingLink: 'https://axiom.ai/pricing', n8nStatus: 'HTTP Request', description: 'Browser automation without code using AI.', accent: '#ff4d4d' },
+  { id: 'gumloop', name: 'Gumloop', category: 'Automation', hq: 'Canada', setupTime: '5m', pricingDetail: 'Free / Pro', homeLink: 'https://www.gumloop.com/', docsLink: 'https://docs.gumloop.com/', pricingLink: 'https://www.gumloop.com/pricing', n8nStatus: 'HTTP Request', description: 'Agentic workflow platform for technical teams.', accent: '#ffffff' },
+  { id: 'skyvern', name: 'Skyvern', category: 'Automation', hq: 'USA', setupTime: '10m', pricingDetail: 'Usage-based', homeLink: 'https://www.skyvern.com/', docsLink: 'https://docs.skyvern.com/', pricingLink: 'https://www.skyvern.com/', n8nStatus: 'HTTP Request', description: 'AI agent that automates browser-based workflows.', accent: '#3ecf8e' }
+];
 
-        const AI_TOOLS = [
-            // --- LLMs ---
-            { id: 'openai', name: 'OpenAI (GPT-4o)', category: 'LLM', hq: 'USA', setupTime: '2m', pricingDetail: '$5/1M tokens', homeLink: 'https://openai.com/', docsLink: 'https://platform.openai.com/docs/', pricingLink: 'https://openai.com/pricing/', n8nStatus: 'Native Node', description: 'Industry standard for text, vision, and function calling.', accent: '#10a37f' },
-            { id: 'anthropic', name: 'Anthropic Claude', category: 'LLM', hq: 'USA', setupTime: '3m', pricingDetail: '$3/1M (Sonnet)', homeLink: 'https://anthropic.com/', docsLink: 'https://docs.anthropic.com/', pricingLink: 'https://www.anthropic.com/pricing', n8nStatus: 'Native Node', description: 'Exceptional reasoning and long-context (200k+).', accent: '#d97757' },
-            { id: 'google-gemini', name: 'Google Gemini', category: 'LLM', hq: 'USA', setupTime: '2m', pricingDetail: 'Free tiers', homeLink: 'https://aistudio.google.com/', docsLink: 'https://ai.google.dev/docs', pricingLink: 'https://ai.google.dev/pricing', n8nStatus: 'Native Node', description: 'Massive 2M+ context window and Google ecosystem integration.', accent: '#4285f4' },
-            { id: 'mistral', name: 'Mistral AI', category: 'LLM', hq: 'France', setupTime: '2m', pricingDetail: '€2/1M (Large)', homeLink: 'https://mistral.ai/', docsLink: 'https://docs.mistral.ai/', pricingLink: 'https://mistral.ai/pricing/', n8nStatus: 'Native Node', description: 'Leading European high-efficiency open and proprietary models.', accent: '#fd533e' },
-            { id: 'deepseek', name: 'DeepSeek V3', category: 'LLM', hq: 'China', setupTime: '1m', pricingDetail: '$0.14/1M tokens', homeLink: 'https://www.deepseek.com/', docsLink: 'https://api-docs.deepseek.com/', pricingLink: 'https://www.deepseek.com/', n8nStatus: 'HTTP Request', description: 'Extreme performance-to-price ratio LLM for logic tasks.', accent: '#615ced' },
-            { id: 'cohere', name: 'Cohere', category: 'LLM', hq: 'Canada', setupTime: '3m', pricingDetail: 'Usage-based', homeLink: 'https://cohere.com/', docsLink: 'https://docs.cohere.com/', pricingLink: 'https://cohere.com/pricing', n8nStatus: 'Native Node', description: 'Enterprise-grade LLM specifically focused on RAG and industrial tool-use.', accent: '#3b82f6' },
-            
-            // --- INFERENCE ---
-            { id: 'groq', name: 'Groq', category: 'Inference', hq: 'USA', setupTime: '1m', pricingDetail: '$0.05/1M tokens', homeLink: 'https://groq.com/', docsLink: 'https://console.groq.com/docs/', pricingLink: 'https://groq.com/pricing/', n8nStatus: 'LangChain', description: 'Ultra-fast LPU inference for real-time agent responses.', accent: '#f55036' },
-            { id: 'together', name: 'Together AI', category: 'Inference', hq: 'USA', setupTime: '2m', pricingDetail: 'Per token', homeLink: 'https://www.together.ai/', docsLink: 'https://docs.together.ai/', pricingLink: 'https://www.together.ai/pricing', n8nStatus: 'HTTP Request', description: 'Cloud for high-speed open-source model hosting.', accent: '#ffffff' },
-            { id: 'replicate', name: 'Replicate', category: 'Inference', hq: 'USA', setupTime: '3m', pricingDetail: 'Per-second GPU', homeLink: 'https://replicate.com/', docsLink: 'https://replicate.com/docs', pricingLink: 'https://replicate.com/pricing', n8nStatus: 'Native Node', description: 'Deploy open-source AI models with one line of code.', accent: '#ffffff' },
-            { id: 'fireworks', name: 'Fireworks AI', category: 'Inference', hq: 'USA', setupTime: '2m', pricingDetail: 'Usage-based', homeLink: 'https://fireworks.ai/', docsLink: 'https://readme.fireworks.ai/', pricingLink: 'https://fireworks.ai/pricing', n8nStatus: 'HTTP Request', description: 'Production-ready inference for open models like Llama 3.', accent: '#e11d48' },
+const App = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [viewMode, setViewMode] = useState('grid');
+  const [scrolled, setScrolled] = useState(false);
+  const [showToast, setShowToast] = useState(false);
 
-            // --- AUDIO ---
-            { id: 'elevenlabs', name: 'ElevenLabs', category: 'Audio', hq: 'Global', setupTime: '2m', pricingDetail: '$5/mo starter', homeLink: 'https://elevenlabs.io/', docsLink: 'https://elevenlabs.io/docs', pricingLink: 'https://elevenlabs.io/pricing', n8nStatus: 'Native Node', description: 'The gold standard for high-fidelity AI text-to-speech.', accent: '#ff8a00' },
-            { id: 'deepgram', name: 'Deepgram', category: 'Audio', hq: 'USA', setupTime: '1m', pricingDetail: '$0.004/min', homeLink: 'https://deepgram.com/', docsLink: 'https://developers.deepgram.com/', pricingLink: 'https://deepgram.com/pricing', n8nStatus: 'HTTP Request', description: 'Fastest transcription and intelligence for audio data.', accent: '#13ef95' },
-            { id: 'assemblyai', name: 'AssemblyAI', category: 'Audio', hq: 'USA', setupTime: '2m', pricingDetail: '$0.65/hr', homeLink: 'https://www.assemblyai.com/', docsLink: 'https://www.assemblyai.com/docs', pricingLink: 'https://www.assemblyai.com/pricing', n8nStatus: 'HTTP Request', description: 'Speech-to-text with advanced AI audio analysis.', accent: '#6366f1' },
-            { id: 'suno', name: 'Suno AI', category: 'Audio', hq: 'USA', setupTime: '1m', pricingDetail: '$8/mo basic', homeLink: 'https://suno.com/', docsLink: 'https://www.google.com/search?q=suno+api+docs', pricingLink: 'https://suno.com/pricing', n8nStatus: 'HTTP Request', description: 'Studio-quality music and song generation.', accent: '#ff0055' },
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-            // --- VIDEO ---
-            { id: 'heygen', name: 'HeyGen', category: 'Video', hq: 'USA', setupTime: '5m', pricingDetail: '$29/mo starter', homeLink: 'https://www.heygen.com/', docsLink: 'https://docs.heygen.com/reference', pricingLink: 'https://www.heygen.com/pricing', n8nStatus: 'Native Node', description: 'AI avatars and high-quality video translation.', accent: '#ff4d4d' },
-            { id: 'runway', name: 'Runway Gen-3', category: 'Video', hq: 'USA', setupTime: '5m', pricingDetail: '$12/mo std', homeLink: 'https://runwayml.com/', docsLink: 'https://help.runwayml.com/', pricingLink: 'https://runwayml.com/pricing', n8nStatus: 'HTTP Request', description: 'Cinematic AI video generation and world-class creative tools.', accent: '#ffffff' },
-            { id: 'luma', name: 'Luma Dream Machine', category: 'Video', hq: 'USA', setupTime: '2m', pricingDetail: '$29/mo Lite', homeLink: 'https://lumalabs.ai/', docsLink: 'https://lumalabs.ai/docs', pricingLink: 'https://lumalabs.ai/pricing', n8nStatus: 'HTTP Request', description: 'Hyper-realistic video generation from text and images.', accent: '#6366f1' },
-            { id: 'synthesia', name: 'Synthesia', category: 'Video', hq: 'UK', setupTime: '10m', pricingDetail: '$22/mo', homeLink: 'https://www.synthesia.io/', docsLink: 'https://docs.synthesia.io/', pricingLink: 'https://www.synthesia.io/pricing', n8nStatus: 'HTTP Request', description: 'Professional corporate video generation with AI avatars.', accent: '#2563eb' },
+  const categories = useMemo(() => ['All', ...new Set(AI_TOOLS.map(t => t.category))].sort(), []);
 
-            // --- WEB & SEARCH ---
-            { id: 'firecrawl', name: 'Firecrawl', category: 'Web', hq: 'Global', setupTime: '2m', pricingDetail: '$19/mo', homeLink: 'https://www.firecrawl.dev/', docsLink: 'https://docs.firecrawl.dev/', pricingLink: 'https://www.firecrawl.dev/pricing', n8nStatus: 'Native Node', description: 'Convert any website into LLM-ready clean Markdown.', accent: '#eb5e28' },
-            { id: 'tavily', name: 'Tavily Search', category: 'Search', hq: 'USA', setupTime: '1m', pricingDetail: '$0.01/call', homeLink: 'https://tavily.com/', docsLink: 'https://docs.tavily.com/', pricingLink: 'https://tavily.com/#pricing', n8nStatus: 'Native Node', description: 'Search engine optimized for LLM agent research.', accent: '#23d18c' },
-            { id: 'apify', name: 'Apify', category: 'Web', hq: 'EU', setupTime: '10m', pricingDetail: '$49/mo', homeLink: 'https://apify.com/', docsLink: 'https://docs.apify.com/', pricingLink: 'https://apify.com/pricing', n8nStatus: 'Native Node', description: 'The most comprehensive platform for web scraping.', accent: '#ff0000' },
-            { id: 'perplexity', name: 'Perplexity', category: 'Search', hq: 'USA', setupTime: '1m', pricingDetail: 'Free / Pro', homeLink: 'https://www.perplexity.ai/', docsLink: 'https://docs.perplexity.ai/', pricingLink: 'https://www.perplexity.ai/pro', n8nStatus: 'HTTP Request', description: 'Conversational search engine with real-time citations.', accent: '#1d9bf0' },
+  const filteredTools = useMemo(() => {
+    return AI_TOOLS.filter(tool => {
+      const matchesSearch = 
+        tool.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        tool.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        tool.category.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = selectedCategory === 'All' || tool.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [searchTerm, selectedCategory]);
 
-            // --- CODING ---
-            { id: 'cursor', name: 'Cursor', category: 'Coding', hq: 'USA', setupTime: '2m', pricingDetail: '$20/mo Pro', homeLink: 'https://cursor.com/', docsLink: 'https://docs.cursor.com/', pricingLink: 'https://cursor.com/pricing', n8nStatus: 'Local IDE', description: 'The world\'s first AI-native code editor.', accent: '#3b82f6' },
-            { id: 'replit', name: 'Replit Agent', category: 'Coding', hq: 'USA', setupTime: '2m', pricingDetail: '$15/mo', homeLink: 'https://replit.com/', docsLink: 'https://docs.replit.com/', pricingLink: 'https://replit.com/pricing', n8nStatus: 'Web IDE', description: 'Build and deploy entire apps from natural language.', accent: '#f36d00' },
-            { id: 'codeium', name: 'Codeium', category: 'Coding', hq: 'USA', setupTime: '1m', pricingDetail: 'Generous Free', homeLink: 'https://codeium.com/', docsLink: 'https://codeium.com/docs', pricingLink: 'https://codeium.com/pricing', n8nStatus: 'Plugin', description: 'Ultra-fast AI coding assistant for all major IDEs.', accent: '#09b6a2' },
+  const handleLinkedInShare = () => {
+    const shareUrl = window.location.href;
+    const shareText = `I just found the ultimate AI Intelligence Directory! 🚀 Over 100+ tools indexed for automation. Check it out: ${shareUrl}`;
+    
+    // Copy to clipboard fallback for iFrame environments
+    const textArea = document.createElement("textarea");
+    textArea.value = shareText;
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 5000);
+    } catch (err) {
+      console.error('Copy failed', err);
+    }
+    document.body.removeChild(textArea);
 
-            // --- IMAGES ---
-            { id: 'midjourney', name: 'Midjourney', category: 'Images', hq: 'USA', setupTime: '10m', pricingDetail: '$10/mo', homeLink: 'https://www.midjourney.com/', docsLink: 'https://docs.midjourney.com/', pricingLink: 'https://www.midjourney.com/showcase', n8nStatus: 'HTTP Request', description: 'Artistic state-of-the-art image generation.', accent: '#ffffff' },
-            { id: 'stability', name: 'Stability AI', category: 'Images', hq: 'UK', setupTime: '5m', pricingDetail: 'Usage-based', homeLink: 'https://stability.ai/', docsLink: 'https://platform.stability.ai/docs', pricingLink: 'https://stability.ai/pricing', n8nStatus: 'HTTP Request', description: 'Open-weights powerhouse for image and video generation.', accent: '#6366f1' },
-            { id: 'ideogram', name: 'Ideogram', category: 'Images', hq: 'Canada', setupTime: '1m', pricingDetail: 'Free / Paid', homeLink: 'https://ideogram.ai/', docsLink: 'https://ideogram.ai/api', pricingLink: 'https://ideogram.ai/pricing', n8nStatus: 'HTTP Request', description: 'Best-in-class typography and realistic image generation.', accent: '#ffffff' },
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`, '_blank');
+  };
 
-            // --- DATA & VECTOR ---
-            { id: 'pinecone', name: 'Pinecone', category: 'Data', hq: 'USA', setupTime: '5m', pricingDetail: '$0.08/GB', homeLink: 'https://www.pinecone.io/', docsLink: 'https://docs.pinecone.io/', pricingLink: 'https://www.pinecone.io/pricing/', n8nStatus: 'Native Node', description: 'Managed vector database for industrial AI search.', accent: '#23d18c' },
-            { id: 'weaviate', name: 'Weaviate', category: 'Data', hq: 'EU', setupTime: '10m', pricingDetail: 'Managed starts $25', homeLink: 'https://weaviate.io/', docsLink: 'https://weaviate.io/developers/weaviate', pricingLink: 'https://weaviate.io/pricing', n8nStatus: 'Native Node', description: 'Multi-modal open-source vector database.', accent: '#00a3ff' },
-            { id: 'qdrant', name: 'Qdrant', category: 'Data', hq: 'Germany', setupTime: '10m', pricingDetail: 'Managed available', homeLink: 'https://qdrant.tech/', docsLink: 'https://qdrant.tech/documentation/', pricingLink: 'https://qdrant.tech/pricing/', n8nStatus: 'Native Node', description: 'High-performance vector database in Rust.', accent: '#ff0000' },
+  return (
+    <div className="min-h-screen bg-[#0a0a0c] text-white font-sans selection:bg-indigo-500/30">
+      
+      {/* SUCCESS TOAST */}
+      {showToast && (
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 px-6 py-4 bg-indigo-600 rounded-2xl shadow-2xl border border-white/20 animate-in fade-in slide-in-from-top-4 duration-300">
+          <CheckCircle2 className="w-5 h-5 text-white" />
+          <div className="text-left">
+            <p className="text-sm font-bold">Post text copied to clipboard!</p>
+            <p className="text-[10px] text-indigo-100 font-medium">LinkedIn opened. Paste (Ctrl+V) to share.</p>
+          </div>
+          <button onClick={() => setShowToast(false)} className="ml-4 p-1 hover:bg-white/10 rounded-lg">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
-            // --- MARKETING ---
-            { id: 'jasper', name: 'Jasper AI', category: 'Marketing', hq: 'USA', setupTime: '5m', pricingDetail: '$39/mo', homeLink: 'https://www.jasper.ai/', docsLink: 'https://developers.jasper.ai/', pricingLink: 'https://www.jasper.ai/pricing', n8nStatus: 'HTTP Request', description: 'Enterprise-grade AI content and campaign platform.', accent: '#4f46e5' },
-            { id: 'copyai', name: 'Copy.ai', category: 'Marketing', hq: 'USA', setupTime: '3m', pricingDetail: '$36/mo', homeLink: 'https://www.copy.ai/', docsLink: 'https://docs.copy.ai/', pricingLink: 'https://www.copy.ai/pricing', n8nStatus: 'HTTP Request', description: 'GTM automation and AI writing for large teams.', accent: '#10a37f' },
-            { id: 'writesonic', name: 'Writesonic', category: 'Marketing', hq: 'USA', setupTime: '2m', pricingDetail: '$12/mo', homeLink: 'https://writesonic.com/', docsLink: 'https://docs.writesonic.com/', pricingLink: 'https://writesonic.com/pricing', n8nStatus: 'HTTP Request', description: 'AI platform for SEO-optimized content and blogs.', accent: '#0052ff' },
+      {/* Dynamic Header */}
+      <header className={`fixed top-0 w-full z-50 transition-all duration-300 border-b ${scrolled ? 'bg-black/80 backdrop-blur-xl border-white/10 py-3' : 'bg-transparent border-transparent py-6'}`}>
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between gap-8">
+          <div className="flex items-center gap-3 shrink-0 cursor-pointer" onClick={() => {setSearchTerm(''); setSelectedCategory('All'); window.scrollTo({top: 0, behavior: 'smooth'});}}>
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-indigo-600 to-cyan-500 rounded-lg blur opacity-40 group-hover:opacity-100 transition duration-500"></div>
+              <div className="relative p-2 bg-black rounded-lg border border-white/20">
+                <Cpu className="w-6 h-6 text-white" />
+              </div>
+            </div>
+            <div className="hidden sm:block text-left">
+              <h1 className="text-lg font-bold tracking-tight text-white leading-none uppercase italic">NEURAL HUB</h1>
+              <p className="text-[10px] font-medium tracking-widest text-white/40 uppercase mt-1">AI AGENT INDEX</p>
+            </div>
+          </div>
 
-            // --- PRODUCTIVITY ---
-            { id: 'notion', name: 'Notion AI', category: 'Productivity', hq: 'USA', setupTime: '1m', pricingDetail: '$10/mo addon', homeLink: 'https://www.notion.so/', docsLink: 'https://developers.notion.com/', pricingLink: 'https://www.notion.so/pricing', n8nStatus: 'Native Node', description: 'Integrated workspace AI for summarizing and writing.', accent: '#ffffff' },
-            { id: 'mem', name: 'Mem AI', category: 'Productivity', hq: 'USA', setupTime: '2m', pricingDetail: '$8/mo', homeLink: 'https://mem.ai/', docsLink: 'https://docs.mem.ai/', pricingLink: 'https://mem.ai/pricing', n8nStatus: 'HTTP Request', description: 'AI-powered knowledge management and personal CRM.', accent: '#e11d48' },
-            { id: 'gamma', name: 'Gamma', category: 'Productivity', hq: 'USA', setupTime: '1m', pricingDetail: 'Free / $8/mo', homeLink: 'https://gamma.app/', docsLink: 'https://gamma.app/api', pricingLink: 'https://gamma.app/pricing', n8nStatus: 'HTTP Request', description: 'Generate slides and docs from simple text prompts.', accent: '#9333ea' },
+          <div className="relative flex-grow max-w-xl group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 w-4 h-4 group-focus-within:text-indigo-400 transition-colors" />
+            <input 
+              type="text" 
+              placeholder="Search 100+ tools (e.g. 'n8n native', 'Gemini', 'Automation')..." 
+              className="w-full pl-11 pr-4 py-2.5 bg-white/5 border border-white/10 focus:border-indigo-500/50 focus:bg-white/10 rounded-full text-sm transition-all outline-none placeholder:text-white/20"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
 
-            // --- SALES ---
-            { id: 'clay', name: 'Clay', category: 'Sales', hq: 'USA', setupTime: '10m', pricingDetail: '$149/mo', homeLink: 'https://www.clay.com/', docsLink: 'https://docs.clay.com/', pricingLink: 'https://www.clay.com/pricing', n8nStatus: 'HTTP Request', description: 'Ultimate AI sales enrichment and outreach platform.', accent: '#ff4d4d' },
-            { id: 'gong', name: 'Gong AI', category: 'Sales', hq: 'USA', setupTime: '30m', pricingDetail: 'Enterprise', homeLink: 'https://www.gong.io/', docsLink: 'https://developer.gong.io/', pricingLink: 'https://www.gong.io/pricing/', n8nStatus: 'HTTP Request', description: 'Revenue intelligence and conversation analysis for sales.', accent: '#7c3aed' },
-            
-            // --- SECURITY ---
-            { id: 'vanta', name: 'Vanta', category: 'Security', hq: 'USA', setupTime: '30m', pricingDetail: 'Enterprise', homeLink: 'https://www.vanta.com/', docsLink: 'https://developer.vanta.com/', pricingLink: 'https://www.vanta.com/pricing', n8nStatus: 'HTTP Request', description: 'Automated compliance and trust management platform.', accent: '#6d28d9' },
-            { id: 'snyk', name: 'Snyk AI', category: 'Security', hq: 'Global', setupTime: '10m', pricingDetail: 'Usage-based', homeLink: 'https://snyk.io/', docsLink: 'https://docs.snyk.io/', pricingLink: 'https://snyk.io/pricing/', n8nStatus: 'HTTP Request', description: 'Developer-first security with AI code analysis.', accent: '#4c4a73' },
+          <div className="flex items-center gap-4 shrink-0">
+            <button 
+              onClick={handleLinkedInShare}
+              className="group flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-white text-white hover:text-black rounded-full text-xs font-bold transition-all shadow-[0_0_20px_rgba(79,70,229,0.3)] active:scale-95"
+            >
+              <Linkedin className="w-3.5 h-3.5 group-hover:fill-black fill-white transition-colors" />
+              SHARE
+            </button>
+            <div className="hidden md:flex items-center gap-1 border-l border-white/10 pl-4">
+              <button 
+                onClick={() => setViewMode('grid')}
+                className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white'}`}
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={() => setViewMode('list')}
+                className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white'}`}
+              >
+                <List className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
 
-            // --- TRANSLATION ---
-            { id: 'deepl', name: 'DeepL', category: 'Translation', hq: 'Germany', setupTime: '1m', pricingDetail: '€4.99 + usage', homeLink: 'https://www.deepl.com/', docsLink: 'https://www.deepl.com/docs-api', pricingLink: 'https://www.deepl.com/pro-api', n8nStatus: 'Native Node', description: 'The worlds most accurate neural machine translation.', accent: '#0f2b46' },
+      <main className="max-w-7xl mx-auto px-6 pt-32 pb-20">
+        {/* Category Horizontal Scroll */}
+        <div className="flex items-center gap-2 mb-12 overflow-x-auto pb-4 no-scrollbar">
+          <div className="flex items-center gap-2">
+            {categories.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-semibold whitespace-nowrap border transition-all ${
+                  selectedCategory === cat 
+                  ? 'bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)]' 
+                  : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:border-white/20'
+                }`}
+              >
+                {CATEGORY_ICONS[cat] || <Sparkles className="w-3.5 h-3.5" />}
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
 
-            // --- DEV TOOLS ---
-            { id: 'langsmith', name: 'LangChain (LangSmith)', category: 'DevTools', hq: 'USA', setupTime: '5m', pricingDetail: 'Free / Usage', homeLink: 'https://www.langchain.com/', docsLink: 'https://docs.smith.langchain.com/', pricingLink: 'https://www.langchain.com/pricing', n8nStatus: 'LangChain', description: 'Observability and debugging for LLM applications.', accent: '#22c55e' },
-            { id: 'wandb', name: 'Weights & Biases', category: 'DevTools', hq: 'USA', setupTime: '15m', pricingDetail: 'Free / Usage', homeLink: 'https://wandb.ai/', docsLink: 'https://docs.wandb.ai/', pricingLink: 'https://wandb.ai/pricing', n8nStatus: 'HTTP Request', description: 'Developer platform for machine learning and AI tracking.', accent: '#ffcc33' }
-        ];
+        {/* Results Heading */}
+        <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-4 border-b border-white/5 pb-8">
+          <div className="text-left w-full">
+            <h2 className="text-3xl font-bold tracking-tight mb-2">Intelligence Directory <span className="text-white/30 text-xl font-normal">({filteredTools.length} Resources)</span></h2>
+            <p className="text-sm text-white/40">Real-time indexed AI services curated for modern agentic workflows.</p>
+          </div>
+        </div>
 
-        const App = () => {
-            const [searchTerm, setSearchTerm] = useState('');
-            const [selectedCategory, setSelectedCategory] = useState('All');
-            const [viewMode, setViewMode] = useState('grid');
-            const [scrolled, setScrolled] = useState(false);
-            const [showToast, setShowToast] = useState(false);
+        {/* Tool Display */}
+        {viewMode === 'grid' ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredTools.map(tool => (
+              <div key={tool.id} className="group relative bg-[#121214] border border-white/5 hover:border-white/20 transition-all duration-500 rounded-2xl overflow-hidden flex flex-col shadow-2xl hover:shadow-indigo-500/10 h-[380px]">
+                {/* Accent Glow */}
+                <div 
+                  className="absolute top-0 right-0 w-32 h-32 blur-[60px] opacity-0 group-hover:opacity-10 transition-opacity pointer-events-none"
+                  style={{ backgroundColor: tool.accent || '#fff' }}
+                ></div>
 
-            useEffect(() => {
-                const handleScroll = () => setScrolled(window.scrollY > 20);
-                window.addEventListener('scroll', handleScroll);
-                return () => window.removeEventListener('scroll', handleScroll);
-            }, []);
+                <div className="p-6 relative z-10 flex flex-col h-full text-left">
+                  <div className="flex justify-between items-start mb-4">
+                    <span className="text-[10px] font-black text-white/60 bg-white/10 border border-white/10 px-2.5 py-1 rounded-md uppercase tracking-wider">
+                      {tool.category}
+                    </span>
+                    <div className={`text-[10px] font-bold px-2 py-1 rounded-md uppercase border ${tool.n8nStatus === 'Native Node' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : 'bg-white/5 text-white/40 border-white/10'}`}>
+                      {tool.n8nStatus}
+                    </div>
+                  </div>
 
-            const categories = useMemo(() => ['All', ...new Set(AI_TOOLS.map(t => t.category))].sort(), []);
+                  <h3 className="text-lg font-bold mb-2 group-hover:text-indigo-300 transition-colors">{tool.name}</h3>
+                  <p className="text-xs text-white/40 leading-relaxed line-clamp-3 mb-6 flex-grow">
+                    {tool.description}
+                  </p>
+                  
+                  <div className="space-y-3 mb-6 pt-6 border-t border-white/5">
+                    <div className="flex items-center justify-between text-[11px] font-medium">
+                      <span className="text-white/30 uppercase tracking-widest flex items-center gap-2"><DollarSign className="w-3 h-3" /> Cost</span>
+                      <span className="text-white/80 truncate ml-2 text-right">{tool.pricingDetail}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] font-medium">
+                      <span className="text-white/30 uppercase tracking-widest flex items-center gap-2"><Clock className="w-3 h-3" /> Setup</span>
+                      <span className="text-white/80">{tool.setupTime}</span>
+                    </div>
+                  </div>
 
-            const filteredTools = useMemo(() => {
-                return AI_TOOLS.filter(tool => {
-                    const matchesSearch = tool.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                                          tool.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                          tool.category.toLowerCase().includes(searchTerm.toLowerCase());
-                    const matchesCategory = selectedCategory === 'All' || tool.category === selectedCategory;
-                    return matchesSearch && matchesCategory;
-                });
-            }, [searchTerm, selectedCategory]);
-
-            const handleLinkedInShare = () => {
-                const shareUrl = window.location.href;
-                const shareText = `Check out Neural Hub - the ultimate AI agents index! 🚀 ${shareUrl}`;
-                const textArea = document.createElement("textarea");
-                textArea.value = shareText;
-                document.body.appendChild(textArea);
-                textArea.select();
-                try { document.execCommand('copy'); setShowToast(true); setTimeout(() => setShowToast(false), 5000); } catch (err) {}
-                document.body.removeChild(textArea);
-                window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`, '_blank');
-            };
-
-            return (
-                <div className="min-h-screen text-white selection:bg-indigo-500/30 pb-20">
-                    {showToast && (
-                        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 px-6 py-4 bg-indigo-600 rounded-2xl shadow-2xl border border-white/20 animate-fade-in">
-                            <Icon name="check-circle" className="w-5 h-5 text-white" />
-                            <div className="text-left">
-                                <p className="text-sm font-bold">Copy success!</p>
-                                <p className="text-[10px] text-indigo-100 font-medium">LinkedIn opened. Paste (Ctrl+V) to share.</p>
-                            </div>
-                            <button onClick={() => setShowToast(false)} className="ml-4 p-1 hover:bg-white/10 rounded-lg">
-                                <Icon name="x" className="w-4 h-4" />
-                            </button>
-                        </div>
-                    )}
-
-                    <header className={`fixed top-0 w-full z-50 transition-all duration-300 border-b ${scrolled ? 'bg-black/80 backdrop-blur-xl border-white/10 py-3' : 'bg-transparent border-transparent py-6'}`}>
-                        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between gap-8">
-                            <div className="flex items-center gap-3 shrink-0 cursor-pointer" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
-                                <div className="relative group">
-                                    <div className="absolute -inset-1 bg-gradient-to-r from-indigo-600 to-cyan-500 rounded-lg blur opacity-40 group-hover:opacity-100 transition duration-500"></div>
-                                    <div className="relative p-2 bg-black rounded-lg border border-white/20 flex items-center justify-center">
-                                        <Icon name="cpu" className="w-6 h-6 text-white" />
-                                    </div>
-                                </div>
-                                <div className="hidden sm:block text-left">
-                                    <h1 className="text-lg font-black tracking-tight text-white leading-none uppercase italic">NEURAL HUB</h1>
-                                    <p className="text-[10px] font-medium tracking-widest text-white/40 uppercase mt-1">AI AGENT INDEX</p>
-                                </div>
-                            </div>
-
-                            <div className="relative flex-grow max-w-xl group">
-                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-indigo-400">
-                                    <Icon name="search" className="w-4 h-4" />
-                                </div>
-                                <input 
-                                    type="text" 
-                                    placeholder="Search 150+ tools (e.g. 'n8n', 'Gemini')..." 
-                                    className="w-full pl-11 pr-4 py-2.5 bg-white/5 border border-white/10 focus:border-indigo-500/50 focus:bg-white/10 rounded-full text-sm outline-none placeholder:text-white/20 text-white"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                />
-                            </div>
-
-                            <div className="flex items-center gap-4 shrink-0">
-                                <button onClick={handleLinkedInShare} className="group flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-white text-white hover:text-black rounded-full text-xs font-bold transition-all shadow-[0_0_20px_rgba(79,70,229,0.3)] active:scale-95">
-                                    <Icon name="linkedin" className="w-3.5 h-3.5 fill-current" /> SHARE
-                                </button>
-                                <div className="hidden md:flex items-center gap-1 border-l border-white/10 pl-4">
-                                    <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white'}`}>
-                                        <Icon name="layout-grid" className="w-4 h-4" />
-                                    </button>
-                                    <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white'}`}>
-                                        <Icon name="list" className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </header>
-
-                    <main className="max-w-7xl mx-auto px-6 pt-32">
-                        <div className="flex items-center gap-2 mb-12 overflow-x-auto pb-4 no-scrollbar">
-                            {categories.map(cat => (
-                                <button key={cat} onClick={() => setSelectedCategory(cat)} className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-semibold whitespace-nowrap border transition-all ${selectedCategory === cat ? 'bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.2)]' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'}`}>
-                                    <Icon name={CATEGORY_ICONS[cat] || 'sparkles'} className="w-3.5 h-3.5" /> {cat}
-                                </button>
-                            ))}
-                        </div>
-
-                        <div className="mb-12">
-                            <h2 className="text-4xl font-bold tracking-tight mb-2">Intelligence Directory <span className="text-white/20 text-2xl font-normal ml-2">({filteredTools.length})</span></h2>
-                            <p className="text-white/40 font-medium">Curated high-performance AI resources for agentic workflows.</p>
-                        </div>
-
-                        {viewMode === 'grid' ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                {filteredTools.map(tool => (
-                                    <div key={tool.id} className="tool-card group relative bg-[#121214] border border-white/5 hover:border-white/20 transition-all duration-500 rounded-2xl overflow-hidden flex flex-col shadow-2xl h-[400px]">
-                                        <div className="tool-card-glow" style={{ backgroundColor: tool.accent || '#4f46e5' }}></div>
-                                        <div className="p-6 relative z-10 flex flex-col h-full text-left">
-                                            <div className="flex justify-between items-start mb-4">
-                                                <span className="text-[9px] font-black text-white/50 bg-white/5 border border-white/10 px-2 py-1 rounded uppercase tracking-widest">{tool.category}</span>
-                                                <div className={`text-[9px] font-black px-2 py-1 rounded uppercase border ${tool.n8nStatus === 'Native Node' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : 'bg-white/5 text-white/30 border-white/10'}`}>{tool.n8nStatus}</div>
-                                            </div>
-                                            <h3 className="text-xl font-bold mb-2 group-hover:text-indigo-300 transition-colors">{tool.name}</h3>
-                                            <p className="text-xs text-white/40 leading-relaxed line-clamp-3 mb-8">{tool.description}</p>
-                                            <div className="mt-auto space-y-3 mb-6 pt-6 border-t border-white/5">
-                                                <div className="flex items-center justify-between text-[11px] font-bold"><span className="text-white/20 uppercase tracking-widest flex items-center gap-2"><Icon name="dollar-sign" className="w-3.5 h-3.5" /> Cost</span><span className="text-white/80">{tool.pricingDetail}</span></div>
-                                                <div className="flex items-center justify-between text-[11px] font-bold"><span className="text-white/20 uppercase tracking-widest flex items-center gap-2"><Icon name="clock" className="w-3.5 h-3.5" /> Setup</span><span className="text-white/80">{tool.setupTime}</span></div>
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <a href={tool.homeLink} target="_blank" className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white/5 hover:bg-white text-white hover:text-black rounded-xl text-[10px] font-black transition-all uppercase tracking-widest border border-white/10">WEBSITE <Icon name="external-link" className="w-3 h-3" /></a>
-                                                <a href={tool.docsLink} target="_blank" className="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/20 border border-white/10 rounded-xl transition-all" title="Docs"><Icon name="book-open" className="w-4 h-4 text-white/50" /></a>
-                                                <a href={tool.pricingLink} target="_blank" className="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/20 border border-white/10 rounded-xl transition-all" title="Pricing"><Icon name="dollar-sign" className="w-4 h-4 text-white/50" /></a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="bg-[#121214] border border-white/5 rounded-3xl overflow-hidden shadow-2xl">
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-left text-sm">
-                                        <thead>
-                                            <tr className="border-b border-white/5 text-[10px] font-black uppercase tracking-widest text-white/20">
-                                                <th className="px-8 py-6">AI Resource</th><th className="px-6 py-6">Category</th><th className="px-6 py-6">Integration</th><th className="px-6 py-6 text-right">Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-white/5">
-                                            {filteredTools.map(tool => (
-                                                <tr key={tool.id} className="hover:bg-white/5 transition-colors group">
-                                                    <td className="px-8 py-5 font-bold">{tool.name}</td>
-                                                    <td className="px-6 py-5 text-white/40 uppercase text-[10px] font-bold">{tool.category}</td>
-                                                    <td className="px-6 py-5 text-indigo-400 font-bold text-[10px] uppercase">{tool.n8nStatus}</td>
-                                                    <td className="px-6 py-5 text-right">
-                                                        <div className="flex items-center justify-end gap-3">
-                                                            <a href={tool.homeLink} target="_blank" className="p-2 bg-white/5 border border-white/10 rounded-lg hover:bg-white hover:text-black transition-all"><Icon name="external-link" className="w-4 h-4" /></a>
-                                                            <a href={tool.docsLink} target="_blank" className="p-2 bg-white/5 border border-white/10 rounded-lg hover:bg-white hover:text-black transition-all"><Icon name="book-open" className="w-4 h-4" /></a>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        )}
-                    </main>
-
-                    <footer className="mt-40 border-t border-white/5 bg-[#070708] py-20">
-                        <div className="max-w-7xl mx-auto px-6 text-center">
-                            <button onClick={handleLinkedInShare} className="mx-auto mb-10 flex items-center gap-3 px-8 py-4 bg-white/5 hover:bg-white text-white/60 hover:text-black border border-white/10 rounded-2xl font-black transition-all uppercase tracking-widest text-[10px]">
-                                <Icon name="linkedin" className="w-4 h-4 fill-current" /> Share Intelligence Hub
-                            </button>
-                            <div className="flex items-center justify-center gap-3 opacity-20 mb-2">
-                                <Icon name="cpu" className="w-5 h-5" />
-                                <span className="text-[11px] font-black tracking-[0.4em] uppercase">NEURAL HUB v2.9.0</span>
-                            </div>
-                            <p className="text-[10px] text-white/10 font-bold uppercase tracking-[0.2em]">Curated AI Directory &bull; April 2026 Edition</p>
-                        </div>
-                    </footer>
+                  <div className="flex gap-2">
+                    <a href={tool.homeLink} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white/5 hover:bg-white text-white hover:text-black rounded-xl text-[10px] font-bold transition-all uppercase tracking-widest">
+                      WEBSITE <ArrowUpRight className="w-3 h-3" />
+                    </a>
+                    <a href={tool.docsLink} target="_blank" rel="noopener noreferrer" className="p-2.5 bg-white/5 hover:bg-white/20 border border-white/10 rounded-xl transition-all" title="Docs">
+                      <BookOpen className="w-4 h-4 text-white/60" />
+                    </a>
+                    <a href={tool.pricingLink} target="_blank" rel="noopener noreferrer" className="p-2.5 bg-white/5 hover:bg-white/20 border border-white/10 rounded-xl transition-all" title="Pricing">
+                      <DollarSign className="w-4 h-4 text-white/60" />
+                    </a>
+                  </div>
                 </div>
-            );
-        };
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-[#121214] border border-white/5 rounded-3xl overflow-hidden shadow-2xl">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-white/5 text-[10px] font-black uppercase tracking-[0.2em] text-white/30">
+                    <th className="px-8 py-6">AI Resource</th>
+                    <th className="px-6 py-6">Category</th>
+                    <th className="px-6 py-6">Integration</th>
+                    <th className="px-6 py-6">Cost Profile</th>
+                    <th className="px-6 py-6 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {filteredTools.map(tool => (
+                    <tr key={tool.id} className="hover:bg-white/5 transition-colors group">
+                      <td className="px-8 py-5">
+                        <div className="flex items-center gap-4 text-left">
+                          <div className="w-10 h-10 rounded-xl border border-white/10 flex items-center justify-center font-bold text-xs bg-white/5 group-hover:border-indigo-500/50 group-hover:bg-indigo-500/10 transition-all">
+                            {tool.name.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="font-bold text-white group-hover:text-indigo-300 transition-colors">{tool.name}</p>
+                            <p className="text-[10px] text-white/30 mt-0.5">{tool.hq}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-5 text-left">
+                        <span className="text-[10px] font-bold uppercase text-white/40 border border-white/10 px-2 py-0.5 rounded">
+                          {tool.category}
+                        </span>
+                      </td>
+                      <td className="px-6 py-5 text-left">
+                        <span className={`text-[10px] font-bold uppercase ${tool.n8nStatus === 'Native Node' ? 'text-indigo-400' : 'text-white/20'}`}>
+                          {tool.n8nStatus}
+                        </span>
+                      </td>
+                      <td className="px-6 py-5 text-left">
+                        <p className="font-semibold text-xs text-white/70">{tool.pricingDetail}</p>
+                        <p className="text-[9px] text-white/20 italic">{tool.pricingModel}</p>
+                      </td>
+                      <td className="px-6 py-5 text-right">
+                        <div className="flex items-center justify-end gap-3 opacity-20 group-hover:opacity-100 transition-opacity">
+                          <a href={tool.homeLink} target="_blank" className="p-2 border border-white/10 rounded-lg hover:bg-white hover:text-black transition-all" title="Website"><ExternalLink className="w-4 h-4" /></a>
+                          <a href={tool.docsLink} target="_blank" className="p-2 border border-white/10 rounded-lg hover:bg-white hover:text-black transition-all" title="Docs"><BookOpen className="w-4 h-4" /></a>
+                          <a href={tool.pricingLink} target="_blank" className="p-2 border border-white/10 rounded-lg hover:bg-white hover:text-black transition-all" title="Pricing"><DollarSign className="w-4 h-4" /></a>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
-</body>
-</html>
+        {/* Empty State */}
+        {filteredTools.length === 0 && (
+          <div className="text-center py-40 border-2 border-dashed border-white/5 rounded-[40px]">
+             <div className="bg-white/5 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+               <Search className="w-8 h-8 text-white/20" />
+             </div>
+            <h3 className="text-xl font-bold mb-2">No matching intelligence found</h3>
+            <p className="text-white/30 text-sm mb-8">Try a different search term or category filter.</p>
+            <button 
+              onClick={() => {setSearchTerm(''); setSelectedCategory('All');}}
+              className="px-8 py-3 bg-white text-black font-bold rounded-full hover:scale-105 transition-transform text-sm"
+            >
+              Reset Discovery
+            </button>
+          </div>
+        )}
+
+        {/* Knowledge Base */}
+        <div className="mt-32 grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="relative group p-1 rounded-[32px] overflow-hidden bg-gradient-to-br from-white/10 to-transparent">
+            <div className="bg-[#0a0a0c] p-10 rounded-[30px] h-full text-left">
+              <h4 className="text-2xl font-bold mb-6 flex items-center gap-3 italic">
+                <Sparkles className="w-6 h-6 text-indigo-400" /> Automation Strategy
+              </h4>
+              <p className="text-white/40 text-sm leading-relaxed mb-8 font-medium">
+                When scaling complex AI flows, prioritize **Native Nodes** to minimize latency. For high-volume tasks like translation or summaries, routing to **DeepSeek** or **Gemini Flash** can reduce costs by up to 90% compared to GPT-4o.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="p-4 bg-white/5 border border-white/10 rounded-2xl">
+                  <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-1">Optimization</p>
+                  <p className="text-xs font-bold text-white/80 leading-snug italic">Use Firecrawl + Tavily together to build real-time memory for custom agents.</p>
+                </div>
+                <div className="p-4 bg-white/5 border border-white/10 rounded-2xl">
+                  <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-1">Low Latency</p>
+                  <p className="text-xs font-bold text-white/80 leading-snug italic">ElevenLabs Turbo-v2.5 is currently the fastest high-fidelity TTS for voice AI.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-indigo-600 rounded-[32px] p-10 flex flex-col justify-between text-white relative overflow-hidden group text-left">
+             <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full -mr-32 -mt-32 blur-[100px] group-hover:scale-110 transition-transform duration-700"></div>
+             <div className="relative z-10">
+               <h4 className="text-3xl font-black mb-4">Suggest a Resource</h4>
+               <p className="text-indigo-100/60 text-base font-medium leading-relaxed max-w-md">
+                 The AI landscape evolves daily. If we're missing a high-performance API or tool that optimizes your workflows, let us know.
+               </p>
+             </div>
+             <button className="relative z-10 mt-12 py-5 bg-white text-black font-black rounded-2xl hover:scale-[1.02] transition-all shadow-xl uppercase tracking-widest text-xs">
+               SUBMIT NEW TOOL
+             </button>
+          </div>
+        </div>
+      </main>
+
+      <footer className="border-t border-white/5 bg-[#070708] py-20">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <button onClick={handleLinkedInShare} className="mx-auto mb-8 flex items-center gap-2 px-8 py-4 bg-white/5 hover:bg-white text-white/60 hover:text-black border border-white/10 rounded-2xl font-bold transition-all uppercase tracking-widest text-xs">
+            <Linkedin className="w-4 h-4" /> Share Marketplace
+          </button>
+          <div className="flex items-center justify-center gap-2 mb-4 opacity-40">
+            <Cpu className="w-4 h-4" />
+            <span className="text-[10px] font-black tracking-[0.5em] uppercase">NEURAL HUB v3.1.0</span>
+          </div>
+          <p className="text-xs text-white/20 font-bold uppercase tracking-widest">Collaborative AI Directory &bull; April 2026 Edition</p>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+export default App;
