@@ -4,14 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neural Hub AI Marketplace</title>
-    <!-- Scripts for React, Tailwind, and Icons -->
+    <!-- Scripts for React and Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone@7.23.10/babel.min.js"></script>
-    
-    <!-- Load Core Lucide - The most stable version for this environment -->
-    <script src="https://unpkg.com/lucide@0.344.0/dist/umd/lucide.min.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
@@ -25,13 +22,8 @@
             overflow-x: hidden;
         }
 
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(8px); }
@@ -40,13 +32,6 @@
 
         .animate-fade-in {
             animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        /* SVG fixes */
-        svg {
-            display: inline-block;
-            vertical-align: middle;
-            flex-shrink: 0;
         }
 
         .tool-card-glow {
@@ -61,9 +46,7 @@
             pointer-events: none;
             z-index: 0;
         }
-        .tool-card:hover .tool-card-glow {
-            opacity: 0.15;
-        }
+        .tool-card:hover .tool-card-glow { opacity: 0.15; }
     </style>
 </head>
 <body>
@@ -71,87 +54,97 @@
 
     <script type="text/babel">
         const { useState, useMemo, useEffect } = React;
-        
-        /**
-         * Robust Icon Component
-         * Manually renders SVGs from Lucide Core metadata to avoid React-wrapper conflicts
-         */
-        const Icon = ({ name, className = "w-4 h-4", strokeWidth = 2.5, ...props }) => {
-            const iconData = window.lucide?.icons?.[name] || 
-                             window.lucide?.icons?.[name.toLowerCase()] || 
-                             window.lucide?.icons?.[name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()] ||
-                             window.lucide?.icons?.['sparkles'];
+
+        // FIXED: Hardcoded SVG paths for 100% reliability
+        const ICON_PATHS = {
+            cpu: <path d="M4 4h16v16H4V4zm4-4v4m8-4v4M0 8h4m0 8H0m20-8h4m-4 8h4m-8 4v4M8 20v4m1-15h6v6H9V9z" />,
+            search: <circle cx="11" cy="11" r="8"></circle>,
+            linkedin: <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z M2 9h4v12H2z M4 2a2 2 0 1 1-2 2 2 2 0 0 1 2-2z" />,
+            sparkles: <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />,
+            bot: <path d="M12 8V4m0 2H8m4 0h4m-9 6h1m8 0h1m-10 4h10 M5 8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z" />,
+            zap: <path d="M13 2 L3 14 L12 14 L11 22 L21 10 L12 10 L13 2 Z" />,
+            "pen-tool": <path d="m12 19 7-7 3 3-7 7-3-3Zm0 0-3-3m0 0 2.29-2.29a1 1 0 0 1 1.42 0l1.58 1.58a1 1 0 0 1 0 1.42L12 19Z" />,
+            video: <path d="m22 8-6 4 6 4V8Z M2 6h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z" />,
+            mic: <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z M19 10v2a7 7 0 0 1-14 0v-2 M12 19v3" />,
+            globe: <circle cx="12" cy="12" r="10"></circle>,
+            "file-text": <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M16 13H8m8 4H8" />,
+            database: <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>,
+            code: <polyline points="16 18 22 12 16 6"></polyline>,
+            "line-chart": <path d="M3 3v18h18 M18 9l-5 5-2-2-5 5" />,
+            scale: <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z M2 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z M7 21h10" />,
+            "shopping-bag": <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z M3 6h18 M16 10a4 4 0 0 1-8 0" />,
+            terminal: <polyline points="4 17 10 11 4 5"></polyline>,
+            headphones: <path d="M3 18v-6a9 9 0 0 1 18 0v6 M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />,
+            clock: <circle cx="12" cy="12" r="10"></circle>,
+            "layout-grid": <rect width="7" height="7" x="3" y="3" rx="1"></rect>,
+            list: <line x1="8" x2="21" y1="6" y2="6"></line>,
+            "shield-check": <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z M9 12l2 2 4-4" />,
+            languages: <path d="m5 8 6 6 M4 14l6-6 M2 5h12 M7 2h1" />,
+            users: <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />,
+            layers: <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>,
+            stethoscope: <path d="M3 12h.01M12 3h.01M21 12h.01" />,
+            "book-open": <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />,
+            "external-link": <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6 M15 3h6v6 M10 14 21 3" />,
+            "dollar-sign": <line x1="12" x2="12" y1="2" y2="22"></line>,
+            "check-circle": <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14 M22 4L12 14.01l-3-3" />,
+            x: <line x1="18" x2="6" y1="6" y2="18"></line>
+        };
+
+        const Icon = ({ name, className = "w-4 h-4", strokeWidth = 2.5 }) => {
+            const key = name.toLowerCase();
+            const path = ICON_PATHS[key] || ICON_PATHS['sparkles'];
             
-            if (!iconData) return null;
-
-            const [tag, attrs, children] = iconData;
-
-            const renderNodes = (nodes) => {
-                return nodes.map(([childTag, childAttrs], i) => 
-                    React.createElement(childTag, { ...childAttrs, key: i })
-                );
-            };
+            // Special paths that need additional definitions (like search circle or clock hands)
+            let extra = null;
+            if (key === 'search') extra = <line x1="21" x2="16.65" y1="21" y2="16.65"></line>;
+            if (key === 'clock') extra = <polyline points="12 6 12 12 16 14"></polyline>;
+            if (key === 'layout-grid') extra = <><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect></>;
+            if (key === 'list') extra = <><line x1="8" x2="21" y1="12" y2="12"></line><line x1="8" x2="21" y1="18" y2="18"></line><line x1="3" x2="3.01" y1="6" y2="6"></line><line x1="3" x2="3.01" y1="12" y2="12"></line><line x1="3" x2="3.01" y1="18" y2="18"></line></>;
+            if (key === 'dollar-sign') extra = <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>;
+            if (key === 'database') extra = <><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"></path></>;
+            if (key === 'code') extra = <polyline points="8 6 2 12 8 18"></polyline>;
+            if (key === 'layers') extra = <><polygon points="12 7 2 12 12 17 22 12 12 7"></polygon><polygon points="12 12 2 17 12 22 22 17 12 12"></polygon></>;
+            if (key === 'globe') extra = <><path d="M2 12h20"></path><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></>;
 
             return (
                 <svg
-                    {...attrs}
-                    className={className}
-                    strokeWidth={strokeWidth}
+                    viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
+                    strokeWidth={strokeWidth}
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    {...props}
+                    className={className}
                 >
-                    {renderNodes(children)}
+                    {path}
+                    {extra}
                 </svg>
             );
         };
 
         const CATEGORY_ICONS = {
-            All: 'sparkles',
-            LLM: 'bot',
-            Inference: 'zap',
-            Images: 'pen-tool',
-            Video: 'video',
-            Audio: 'mic',
-            Web: 'globe',
-            Document: 'file-text',
-            Data: 'database',
-            Coding: 'code',
-            Marketing: 'line-chart',
-            Legal: 'scale',
-            Sales: 'shopping-bag',
-            DevTools: 'terminal',
-            Support: 'headphones',
-            Productivity: 'clock',
-            Design: 'layout-grid',
-            Security: 'shield-check',
-            Search: 'search',
-            Translation: 'languages',
-            HR: 'users',
-            Automation: 'zap',
-            Enterprise: 'layers',
-            Medical: 'stethoscope',
-            Research: 'book-open',
-            Writing: 'file-text'
+            All: 'sparkles', LLM: 'bot', Inference: 'zap', Images: 'pen-tool', Video: 'video', Audio: 'mic',
+            Web: 'globe', Document: 'file-text', Data: 'database', Coding: 'code', Marketing: 'line-chart',
+            Legal: 'scale', Sales: 'shopping-bag', DevTools: 'terminal', Support: 'headphones', Productivity: 'clock',
+            Design: 'layout-grid', Security: 'shield-check', Search: 'search', Translation: 'languages',
+            HR: 'users', Automation: 'zap', Enterprise: 'layers', Medical: 'stethoscope', Research: 'book-open', Writing: 'file-text'
         };
 
         const AI_TOOLS = [
-            { id: 'openai', name: 'OpenAI (GPT-4o)', category: 'LLM', hq: 'USA', setupTime: '2m', pricingModel: 'Usage', pricingDetail: '$5/1M tokens', freeTier: 'Limited', pricingLink: 'https://openai.com/api/pricing/', docsLink: 'https://platform.openai.com/docs/', homeLink: 'https://openai.com/', n8nStatus: 'Native Node', description: 'Industry standard for text, vision, and function calling.', accent: '#10a37f' },
-            { id: 'anthropic', name: 'Anthropic Claude', category: 'LLM', hq: 'USA', setupTime: '3m', pricingModel: 'Usage', pricingDetail: '$3/1M (Sonnet)', freeTier: '$5 Credit', pricingLink: 'https://www.anthropic.com/pricing', docsLink: 'https://docs.anthropic.com/', homeLink: 'https://anthropic.com/', n8nStatus: 'Native Node', description: 'Exceptional reasoning and long-context (200k+).', accent: '#d97757' },
-            { id: 'google-gemini', name: 'Google Gemini', category: 'LLM', hq: 'USA', setupTime: '2m', pricingModel: 'Hybrid', pricingDetail: 'Free tiers', freeTier: '15 RPM Free', pricingLink: 'https://ai.google.dev/pricing', docsLink: 'https://ai.google.dev/docs', homeLink: 'https://aistudio.google.com/', n8nStatus: 'Native Node', description: 'Massive 2M+ context window and Google ecosystem integration.', accent: '#4285f4' },
-            { id: 'mistral', name: 'Mistral AI', category: 'LLM', hq: 'France', setupTime: '2m', pricingModel: 'Usage', pricingDetail: '€2/1M (Large)', freeTier: 'Free trial', pricingLink: 'https://mistral.ai/en/pricing', docsLink: 'https://docs.mistral.ai/', homeLink: 'https://mistral.ai/', n8nStatus: 'Native Node', description: 'Leading European high-efficiency open and proprietary models.', accent: '#fd533e' },
-            { id: 'deepseek', name: 'DeepSeek V3', category: 'LLM', hq: 'China', setupTime: '1m', pricingModel: 'Usage', pricingDetail: '$0.14/1M tokens', freeTier: 'Initial credit', pricingLink: 'https://www.deepseek.com/', docsLink: 'https://api-docs.deepseek.com/', homeLink: 'https://www.deepseek.com/', n8nStatus: 'HTTP Request', description: 'Extreme performance-to-price ratio LLM for logic tasks.', accent: '#615ced' },
-            { id: 'groq', name: 'Groq', category: 'Inference', hq: 'USA', setupTime: '1m', pricingModel: 'Usage', pricingDetail: '$0.05/1M tokens', freeTier: 'Public tier', pricingLink: 'https://groq.com/pricing/', docsLink: 'https://console.groq.com/docs/', homeLink: 'https://groq.com/', n8nStatus: 'LangChain', description: 'Ultra-fast LPU inference for real-time agent responses.', accent: '#f55036' },
-            { id: 'together', name: 'Together AI', category: 'Inference', hq: 'USA', setupTime: '2m', pricingModel: 'Usage', pricingDetail: 'Per token', freeTier: '$25 credit', pricingLink: 'https://www.together.ai/pricing', docsLink: 'https://docs.together.ai/', homeLink: 'https://www.together.ai/', n8nStatus: 'HTTP Request', description: 'Cloud for high-speed open-source model hosting.', accent: '#ffffff' },
-            { id: 'replicate', name: 'Replicate', category: 'Inference', hq: 'USA', setupTime: '3m', pricingModel: 'Usage', pricingDetail: 'Per-second GPU', freeTier: 'Small trial', pricingLink: 'https://replicate.com/pricing', docsLink: 'https://replicate.com/docs', homeLink: 'https://replicate.com/', n8nStatus: 'Native Node', description: 'Deploy open-source AI models with one line of code.', accent: '#ffffff' },
-            { id: 'elevenlabs', name: 'ElevenLabs', category: 'Audio', hq: 'Global', setupTime: '2m', pricingModel: 'Sub', pricingDetail: '$5/mo starter', freeTier: '10k chars/mo', pricingLink: 'https://elevenlabs.io/pricing', docsLink: 'https://elevenlabs.io/docs', homeLink: 'https://elevenlabs.io/', n8nStatus: 'Native Node', description: 'The gold standard for high-fidelity AI text-to-speech.', accent: '#ff8a00' },
-            { id: 'heygen', name: 'HeyGen', category: 'Video', hq: 'USA', setupTime: '5m', pricingModel: 'Sub', pricingDetail: '$29/mo starter', freeTier: '1 min free', pricingLink: 'https://www.heygen.com/pricing', docsLink: 'https://docs.heygen.com/reference', homeLink: 'https://www.heygen.com/', n8nStatus: 'Native Node', description: 'AI avatars and high-quality video translation.', accent: '#ff4d4d' },
-            { id: 'firecrawl', name: 'Firecrawl', category: 'Web', hq: 'Global', setupTime: '2m', pricingModel: 'Usage', pricingDetail: '$19/mo', freeTier: '500 scrapes', pricingLink: 'https://www.firecrawl.dev/pricing', docsLink: 'https://docs.firecrawl.dev/', homeLink: 'https://www.firecrawl.dev/', n8nStatus: 'Native Node', description: 'Convert any website into LLM-ready clean Markdown.', accent: '#eb5e28' },
-            { id: 'tavily', name: 'Tavily Search', category: 'Search', hq: 'USA', setupTime: '1m', pricingModel: 'Usage', pricingDetail: '$0.01/call', freeTier: '1k calls', pricingLink: 'https://tavily.com/#pricing', docsLink: 'https://docs.tavily.com/', homeLink: 'https://tavily.com/', n8nStatus: 'Native Node', description: 'Search engine optimized for LLM agent research.', accent: '#23d18c' },
-            { id: 'notion-ai', name: 'Notion AI', category: 'Productivity', hq: 'USA', setupTime: '1m', pricingModel: 'Sub', pricingDetail: '$10/mo addon', freeTier: 'Limited', pricingLink: 'https://www.notion.so/product/ai', docsLink: 'https://developers.notion.com/', homeLink: 'https://www.notion.so/', n8nStatus: 'Native Node', description: 'Integrated workspace AI for summarizing and writing.', accent: '#ffffff' },
-            { id: 'cursor', name: 'Cursor', category: 'Coding', hq: 'USA', setupTime: '2m', pricingModel: 'Sub', pricingDetail: '$20/mo Pro', freeTier: 'Limited', pricingLink: 'https://cursor.com/pricing', docsLink: 'https://docs.cursor.com/', homeLink: 'https://cursor.com/', n8nStatus: 'Local IDE', description: 'The world\'s first AI-native code editor.', accent: '#3b82f6' }
+            { id: 'openai', name: 'OpenAI (GPT-4o)', category: 'LLM', hq: 'USA', setupTime: '2m', pricingDetail: '$5/1M tokens', homeLink: 'https://openai.com/', docsLink: 'https://platform.openai.com/docs/', pricingLink: 'https://openai.com/pricing/', n8nStatus: 'Native Node', description: 'Industry standard for text, vision, and function calling.', accent: '#10a37f' },
+            { id: 'anthropic', name: 'Anthropic Claude', category: 'LLM', hq: 'USA', setupTime: '3m', pricingDetail: '$3/1M (Sonnet)', homeLink: 'https://anthropic.com/', docsLink: 'https://docs.anthropic.com/', pricingLink: 'https://www.anthropic.com/pricing', n8nStatus: 'Native Node', description: 'Exceptional reasoning and long-context (200k+).', accent: '#d97757' },
+            { id: 'google-gemini', name: 'Google Gemini', category: 'LLM', hq: 'USA', setupTime: '2m', pricingDetail: 'Free tiers', homeLink: 'https://aistudio.google.com/', docsLink: 'https://ai.google.dev/docs', pricingLink: 'https://ai.google.dev/pricing', n8nStatus: 'Native Node', description: 'Massive 2M+ context window and Google ecosystem integration.', accent: '#4285f4' },
+            { id: 'mistral', name: 'Mistral AI', category: 'LLM', hq: 'France', setupTime: '2m', pricingDetail: '€2/1M (Large)', homeLink: 'https://mistral.ai/', docsLink: 'https://docs.mistral.ai/', pricingLink: 'https://mistral.ai/pricing/', n8nStatus: 'Native Node', description: 'Leading European high-efficiency open and proprietary models.', accent: '#fd533e' },
+            { id: 'deepseek', name: 'DeepSeek V3', category: 'LLM', hq: 'China', setupTime: '1m', pricingDetail: '$0.14/1M tokens', homeLink: 'https://www.deepseek.com/', docsLink: 'https://api-docs.deepseek.com/', pricingLink: 'https://www.deepseek.com/', n8nStatus: 'HTTP Request', description: 'Extreme performance-to-price ratio LLM for logic tasks.', accent: '#615ced' },
+            { id: 'groq', name: 'Groq', category: 'Inference', hq: 'USA', setupTime: '1m', pricingDetail: '$0.05/1M tokens', homeLink: 'https://groq.com/', docsLink: 'https://console.groq.com/docs/', pricingLink: 'https://groq.com/pricing/', n8nStatus: 'LangChain', description: 'Ultra-fast LPU inference for real-time agent responses.', accent: '#f55036' },
+            { id: 'together', name: 'Together AI', category: 'Inference', hq: 'USA', setupTime: '2m', pricingDetail: 'Per token', homeLink: 'https://www.together.ai/', docsLink: 'https://docs.together.ai/', pricingLink: 'https://www.together.ai/pricing', n8nStatus: 'HTTP Request', description: 'Cloud for high-speed open-source model hosting.', accent: '#ffffff' },
+            { id: 'replicate', name: 'Replicate', category: 'Inference', hq: 'USA', setupTime: '3m', pricingDetail: 'Per-second GPU', homeLink: 'https://replicate.com/', docsLink: 'https://replicate.com/docs', pricingLink: 'https://replicate.com/pricing', n8nStatus: 'Native Node', description: 'Deploy open-source AI models with one line of code.', accent: '#ffffff' },
+            { id: 'elevenlabs', name: 'ElevenLabs', category: 'Audio', hq: 'Global', setupTime: '2m', pricingDetail: '$5/mo starter', homeLink: 'https://elevenlabs.io/', docsLink: 'https://elevenlabs.io/docs', pricingLink: 'https://elevenlabs.io/pricing', n8nStatus: 'Native Node', description: 'The gold standard for high-fidelity AI text-to-speech.', accent: '#ff8a00' },
+            { id: 'heygen', name: 'HeyGen', category: 'Video', hq: 'USA', setupTime: '5m', pricingDetail: '$29/mo starter', homeLink: 'https://www.heygen.com/', docsLink: 'https://docs.heygen.com/', pricingLink: 'https://www.heygen.com/pricing', n8nStatus: 'Native Node', description: 'AI avatars and high-quality video translation.', accent: '#ff4d4d' },
+            { id: 'firecrawl', name: 'Firecrawl', category: 'Web', hq: 'Global', setupTime: '2m', pricingDetail: '$19/mo', homeLink: 'https://www.firecrawl.dev/', docsLink: 'https://docs.firecrawl.dev/', pricingLink: 'https://www.firecrawl.dev/pricing', n8nStatus: 'Native Node', description: 'Convert any website into LLM-ready clean Markdown.', accent: '#eb5e28' },
+            { id: 'tavily', name: 'Tavily Search', category: 'Search', hq: 'USA', setupTime: '1m', pricingDetail: '$0.01/call', homeLink: 'https://tavily.com/', docsLink: 'https://docs.tavily.com/', pricingLink: 'https://tavily.com/#pricing', n8nStatus: 'Native Node', description: 'Search engine optimized for LLM agent research.', accent: '#23d18c' },
+            { id: 'notion-ai', name: 'Notion AI', category: 'Productivity', hq: 'USA', setupTime: '1m', pricingDetail: '$10/mo addon', homeLink: 'https://www.notion.so/product/ai', docsLink: 'https://developers.notion.com/', pricingLink: 'https://www.notion.so/pricing', n8nStatus: 'Native Node', description: 'Integrated workspace AI for summarizing and writing.', accent: '#ffffff' },
+            { id: 'cursor', name: 'Cursor', category: 'Coding', hq: 'USA', setupTime: '2m', pricingDetail: '$20/mo Pro', homeLink: 'https://cursor.com/', docsLink: 'https://docs.cursor.com/', pricingLink: 'https://cursor.com/pricing', n8nStatus: 'Local IDE', description: 'The world\'s first AI-native code editor.', accent: '#3b82f6' }
         ];
 
         const App = () => {
@@ -171,10 +164,9 @@
 
             const filteredTools = useMemo(() => {
                 return AI_TOOLS.filter(tool => {
-                    const matchesSearch = 
-                        tool.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                        tool.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        tool.category.toLowerCase().includes(searchTerm.toLowerCase());
+                    const matchesSearch = tool.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                                          tool.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                          tool.category.toLowerCase().includes(searchTerm.toLowerCase());
                     const matchesCategory = selectedCategory === 'All' || tool.category === selectedCategory;
                     return matchesSearch && matchesCategory;
                 });
@@ -183,23 +175,17 @@
             const handleLinkedInShare = () => {
                 const shareUrl = window.location.href;
                 const shareText = `Check out Neural Hub - the ultimate AI agents index! 🚀 ${shareUrl}`;
-                
                 const textArea = document.createElement("textarea");
                 textArea.value = shareText;
                 document.body.appendChild(textArea);
                 textArea.select();
-                try {
-                    document.execCommand('copy');
-                    setShowToast(true);
-                    setTimeout(() => setShowToast(false), 5000);
-                } catch (err) {}
+                try { document.execCommand('copy'); setShowToast(true); setTimeout(() => setShowToast(false), 5000); } catch (err) {}
                 document.body.removeChild(textArea);
                 window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`, '_blank');
             };
 
             return (
                 <div className="min-h-screen text-white selection:bg-indigo-500/30 pb-20">
-                    {/* SUCCESS TOAST */}
                     {showToast && (
                         <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 px-6 py-4 bg-indigo-600 rounded-2xl shadow-2xl border border-white/20 animate-fade-in">
                             <Icon name="check-circle" className="w-5 h-5 text-white" />
@@ -213,7 +199,6 @@
                         </div>
                     )}
 
-                    {/* Header */}
                     <header className={`fixed top-0 w-full z-50 transition-all duration-300 border-b ${scrolled ? 'bg-black/80 backdrop-blur-xl border-white/10 py-3' : 'bg-transparent border-transparent py-6'}`}>
                         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between gap-8">
                             <div className="flex items-center gap-3 shrink-0 cursor-pointer" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
@@ -230,37 +215,27 @@
                             </div>
 
                             <div className="relative flex-grow max-w-xl group">
-                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-indigo-400 transition-colors">
+                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-indigo-400">
                                     <Icon name="search" className="w-4 h-4" />
                                 </div>
                                 <input 
                                     type="text" 
                                     placeholder="Search 150+ tools (e.g. 'n8n', 'Gemini')..." 
-                                    className="w-full pl-11 pr-4 py-2.5 bg-white/5 border border-white/10 focus:border-indigo-500/50 focus:bg-white/10 rounded-full text-sm transition-all outline-none placeholder:text-white/20 text-white"
+                                    className="w-full pl-11 pr-4 py-2.5 bg-white/5 border border-white/10 focus:border-indigo-500/50 focus:bg-white/10 rounded-full text-sm outline-none placeholder:text-white/20 text-white"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
                             </div>
 
                             <div className="flex items-center gap-4 shrink-0">
-                                <button 
-                                    onClick={handleLinkedInShare}
-                                    className="group flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-white text-white hover:text-black rounded-full text-xs font-bold transition-all shadow-[0_0_20px_rgba(79,70,229,0.3)] active:scale-95"
-                                >
-                                    <Icon name="linkedin" className="w-3.5 h-3.5 fill-current" />
-                                    SHARE
+                                <button onClick={handleLinkedInShare} className="group flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-white text-white hover:text-black rounded-full text-xs font-bold transition-all shadow-[0_0_20px_rgba(79,70,229,0.3)] active:scale-95">
+                                    <Icon name="linkedin" className="w-3.5 h-3.5 fill-current" /> SHARE
                                 </button>
                                 <div className="hidden md:flex items-center gap-1 border-l border-white/10 pl-4">
-                                    <button 
-                                        onClick={() => setViewMode('grid')}
-                                        className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white'}`}
-                                    >
+                                    <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white'}`}>
                                         <Icon name="layout-grid" className="w-4 h-4" />
                                     </button>
-                                    <button 
-                                        onClick={() => setViewMode('list')}
-                                        className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white'}`}
-                                    >
+                                    <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white'}`}>
                                         <Icon name="list" className="w-4 h-4" />
                                     </button>
                                 </div>
@@ -269,27 +244,17 @@
                     </header>
 
                     <main className="max-w-7xl mx-auto px-6 pt-32">
-                        {/* Horizontal Categories */}
                         <div className="flex items-center gap-2 mb-12 overflow-x-auto pb-4 no-scrollbar">
                             {categories.map(cat => (
-                                <button
-                                    key={cat}
-                                    onClick={() => setSelectedCategory(cat)}
-                                    className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-semibold whitespace-nowrap border transition-all ${
-                                        selectedCategory === cat 
-                                        ? 'bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.2)]' 
-                                        : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
-                                    }`}
-                                >
-                                    <Icon name={CATEGORY_ICONS[cat] || 'sparkles'} className="w-3.5 h-3.5" />
-                                    {cat}
+                                <button key={cat} onClick={() => setSelectedCategory(cat)} className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-semibold whitespace-nowrap border transition-all ${selectedCategory === cat ? 'bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.2)]' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'}`}>
+                                    <Icon name={CATEGORY_ICONS[cat] || 'sparkles'} className="w-3.5 h-3.5" /> {cat}
                                 </button>
                             ))}
                         </div>
 
                         <div className="mb-12">
                             <h2 className="text-4xl font-bold tracking-tight mb-2">Intelligence Directory <span className="text-white/20 text-2xl font-normal ml-2">({filteredTools.length})</span></h2>
-                            <p className="text-white/40 font-medium">Curated high-performance AI resources for modern automation.</p>
+                            <p className="text-white/40 font-medium">Curated high-performance AI resources for agentic workflows.</p>
                         </div>
 
                         {viewMode === 'grid' ? (
@@ -297,43 +262,21 @@
                                 {filteredTools.map(tool => (
                                     <div key={tool.id} className="tool-card group relative bg-[#121214] border border-white/5 hover:border-white/20 transition-all duration-500 rounded-2xl overflow-hidden flex flex-col shadow-2xl h-[400px]">
                                         <div className="tool-card-glow" style={{ backgroundColor: tool.accent || '#4f46e5' }}></div>
-
                                         <div className="p-6 relative z-10 flex flex-col h-full text-left">
                                             <div className="flex justify-between items-start mb-4">
-                                                <span className="text-[9px] font-black text-white/50 bg-white/5 border border-white/10 px-2 py-1 rounded uppercase tracking-widest">
-                                                    {tool.category}
-                                                </span>
-                                                <div className={`text-[9px] font-black px-2 py-1 rounded uppercase border ${tool.n8nStatus === 'Native Node' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : 'bg-white/5 text-white/30 border-white/10'}`}>
-                                                    {tool.n8nStatus}
-                                                </div>
+                                                <span className="text-[9px] font-black text-white/50 bg-white/5 border border-white/10 px-2 py-1 rounded uppercase tracking-widest">{tool.category}</span>
+                                                <div className={`text-[9px] font-black px-2 py-1 rounded uppercase border ${tool.n8nStatus === 'Native Node' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : 'bg-white/5 text-white/30 border-white/10'}`}>{tool.n8nStatus}</div>
                                             </div>
-
                                             <h3 className="text-xl font-bold mb-2 group-hover:text-indigo-300 transition-colors">{tool.name}</h3>
-                                            <p className="text-xs text-white/40 leading-relaxed line-clamp-3 mb-8">
-                                                {tool.description}
-                                            </p>
-                                            
+                                            <p className="text-xs text-white/40 leading-relaxed line-clamp-3 mb-8">{tool.description}</p>
                                             <div className="mt-auto space-y-3 mb-6 pt-6 border-t border-white/5">
-                                                <div className="flex items-center justify-between text-[11px] font-bold">
-                                                    <span className="text-white/20 uppercase tracking-widest flex items-center gap-2"><Icon name="dollar-sign" className="w-3.5 h-3.5" /> Cost</span>
-                                                    <span className="text-white/80">{tool.pricingDetail}</span>
-                                                </div>
-                                                <div className="flex items-center justify-between text-[11px] font-bold">
-                                                    <span className="text-white/20 uppercase tracking-widest flex items-center gap-2"><Icon name="clock" className="w-3.5 h-3.5" /> Setup</span>
-                                                    <span className="text-white/80">{tool.setupTime}</span>
-                                                </div>
+                                                <div className="flex items-center justify-between text-[11px] font-bold"><span className="text-white/20 uppercase tracking-widest flex items-center gap-2"><Icon name="dollar-sign" className="w-3.5 h-3.5" /> Cost</span><span className="text-white/80">{tool.pricingDetail}</span></div>
+                                                <div className="flex items-center justify-between text-[11px] font-bold"><span className="text-white/20 uppercase tracking-widest flex items-center gap-2"><Icon name="clock" className="w-3.5 h-3.5" /> Setup</span><span className="text-white/80">{tool.setupTime}</span></div>
                                             </div>
-
                                             <div className="flex gap-2">
-                                                <a href={tool.homeLink} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white/5 hover:bg-white text-white hover:text-black rounded-xl text-[10px] font-black transition-all uppercase tracking-widest border border-white/10">
-                                                    WEBSITE <Icon name="external-link" className="w-3 h-3" />
-                                                </a>
-                                                <a href={tool.docsLink} target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/20 border border-white/10 rounded-xl transition-all" title="Docs">
-                                                    <Icon name="book-open" className="w-4 h-4 text-white/50" />
-                                                </a>
-                                                <a href={tool.pricingLink} target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/20 border border-white/10 rounded-xl transition-all" title="Pricing">
-                                                    <Icon name="dollar-sign" className="w-4 h-4 text-white/50" />
-                                                </a>
+                                                <a href={tool.homeLink} target="_blank" className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white/5 hover:bg-white text-white hover:text-black rounded-xl text-[10px] font-black transition-all uppercase tracking-widest border border-white/10">WEBSITE <Icon name="external-link" className="w-3 h-3" /></a>
+                                                <a href={tool.docsLink} target="_blank" className="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/20 border border-white/10 rounded-xl transition-all" title="Docs"><Icon name="book-open" className="w-4 h-4 text-white/50" /></a>
+                                                <a href={tool.pricingLink} target="_blank" className="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/20 border border-white/10 rounded-xl transition-all" title="Pricing"><Icon name="dollar-sign" className="w-4 h-4 text-white/50" /></a>
                                             </div>
                                         </div>
                                     </div>
@@ -345,10 +288,7 @@
                                     <table className="w-full text-left text-sm">
                                         <thead>
                                             <tr className="border-b border-white/5 text-[10px] font-black uppercase tracking-widest text-white/20">
-                                                <th className="px-8 py-6">AI Resource</th>
-                                                <th className="px-6 py-6">Category</th>
-                                                <th className="px-6 py-6">Integration</th>
-                                                <th className="px-6 py-6 text-right">Actions</th>
+                                                <th className="px-8 py-6">AI Resource</th><th className="px-6 py-6">Category</th><th className="px-6 py-6">Integration</th><th className="px-6 py-6 text-right">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-white/5">
@@ -379,7 +319,7 @@
                             </button>
                             <div className="flex items-center justify-center gap-3 opacity-20 mb-2">
                                 <Icon name="cpu" className="w-5 h-5" />
-                                <span className="text-[11px] font-black tracking-[0.4em] uppercase">NEURAL HUB v2.7.0</span>
+                                <span className="text-[11px] font-black tracking-[0.4em] uppercase">NEURAL HUB v2.8.0</span>
                             </div>
                             <p className="text-[10px] text-white/10 font-bold uppercase tracking-[0.2em]">Curated AI Directory &bull; April 2026 Edition</p>
                         </div>
