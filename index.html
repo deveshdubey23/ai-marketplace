@@ -3,7 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neural Hub | 100+ AI Agents Index</title>
+    
+    <!-- PRIMARY SEO TAGS -->
+    <title>Neural Hub | 100+ AI Agents & Tools Index</title>
+    <meta name="description" content="A curated directory of 100+ unique AI agents and tools. Explore LLMs, automation, and AI productivity resources with pricing and setup details.">
+    <meta name="keywords" content="AI Directory, AI Agents, LLM Index, Neural Hub, AI Tools, Automation Tools">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://yourdomain.com/" />
+
+    <!-- OPEN GRAPH (Social Media Crawlers) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Neural Hub | 100+ AI Agents Index">
+    <meta property="og:description" content="Find the right AI tool in seconds. A searchable database of 100+ AI tools organized by use case.">
+    <meta property="og:url" content="https://yourdomain.com/">
+
+    <!-- STRUCTURED DATA (Helps bots understand the 'Index' nature of the site) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      "name": "Neural Hub AI Agent Index",
+      "description": "A curated directory of over 100 AI tools and agents categorized by functionality.",
+      "url": "https://yourdomain.com/",
+      "about": {
+        "@type": "Thing",
+        "name": "Artificial Intelligence Tools"
+      }
+    }
+    </script>
+
     <!-- React & Tailwind CDNs -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
@@ -50,7 +78,13 @@
     </style>
 </head>
 <body>
-    <div id="root"></div>
+    <div id="root">
+        <!-- FALLBACK CONTENT: This is what bots see BEFORE the JavaScript loads -->
+        <div style="display:none;">
+            <h1>Neural Hub - AI Agent Index</h1>
+            <p>Exploring 100+ unique AI resources including OpenAI, Claude, Gemini, Mistral, and many more.</p>
+        </div>
+    </div>
 
     <script type="text/babel">
         const { useState, useMemo, useEffect } = React;
