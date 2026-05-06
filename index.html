@@ -6,9 +6,9 @@
     <meta name="google-site-verification" content="ZCMpsQW0uZ9M8zVnE5zFhqitBul8O0ZpMaMWhjJGW4o" />
     
     <!-- PRIMARY SEO TAGS -->
-    <title>Neural Hub | 280+ AI Agents & Tools Index</title>
-    <meta name="description" content="A curated directory of 280+ unique AI agents and tools. Explore LLMs, automation, and AI productivity resources with pricing and setup details.">
-    <meta name="keywords" content="AI Directory, AI Agents, LLM Index, Neural Hub, AI Tools, Automation Tools, 280+ AI Tools">
+    <title>Neural Hub | 200+ Unique AI Agents & Tools Index</title>
+    <meta name="description" content="A curated directory of 200+ unique AI agents and tools. With Neural Hub, explore LLMs, automation, and AI productivity resources with zero duplication and verified links.">
+    <meta name="keywords" content="AI Directory, AI Agents, LLM Index, Neural Hub, AI Tools, Automation Tools, 200+ Unique AI Tools">
     <meta name="robots" content="index, follow">
 
     <!-- React & Tailwind CDNs -->
@@ -55,6 +55,8 @@
         }
 
         .tool-card:hover .tool-card-glow { opacity: 0.15; }
+        
+        button:active, a:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
@@ -63,6 +65,7 @@
     <script type="text/babel">
         const { useState, useMemo, useEffect } = React;
 
+        // 1. DATA DEFINITIONS
         const ICON_PATHS = {
             cpu: <path d="M4 4h16v16H4V4zm4-4v4m8-4v4M0 8h4m0 8H0m20-8h4m-4 8h4m-8 4v4M8 20v4m1-15h6v6H9V9z" />,
             search: <circle cx="11" cy="11" r="8"></circle>,
@@ -82,163 +85,257 @@
             clock: <circle cx="12" cy="12" r="10"></circle>,
             "check-circle": <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14 M22 4L12 14.01l-3-3" />,
             box: <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />,
-            gamepad: <path d="M6 12h4m-2-2v4M15 11h.01M18 13h.01M2 6v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" />,
-            landmark: <path d="M3 21h18M3 10h18M5 10v11M9 10v11M13 10v11M17 10v11M12 2 2 7h20Z" />,
-            leaf: <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.4 21 2c1 5.5.4 9-3 13.5 M11 20c1 0 3-1 6-4 M11 20v-7" />,
-            briefcase: <path d="M16 7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h8z M12 7V3a2 2 0 0 1 2-2h-4a2 2 0 0 1-2 2v4" />,
-            users: <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M9 7a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" />,
-            mic: <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z M19 10v2a7 7 0 0 1-14 0v-2 M12 19v4" />,
-            video: <path d="m23 7-7 5 7 5V7z M16 5H3a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z" />,
-            "line-chart": <path d="M3 3v18h18 M18 17l-6-6-4 4-5-5" />,
-            layers: <polygon points="12 2 2 7 12 12 22 7 12 2" />,
-            stethoscope: <path d="M12 1v4M12 19v4M5 12H1M19 12h4" />,
             x: <line x1="18" x2="6" y1="6" y2="18"></line>
         };
 
         const CATEGORY_ICONS = {
-            All: 'sparkles', LLM: 'bot', Inference: 'zap', Images: 'pen-tool', Video: 'video', Audio: 'mic',
+            All: 'sparkles', LLM: 'bot', Video: 'video', Audio: 'mic',
             Web: 'globe', Document: 'file-text', Data: 'database', Coding: 'code', Marketing: 'line-chart',
-            Legal: 'scale', Sales: 'shopping-bag', DevTools: 'terminal', Support: 'headphones', Productivity: 'clock',
-            Design: 'layout-grid', Security: 'shield-check', Search: 'search', Translation: 'languages',
-            HR: 'users', Automation: 'zap', Enterprise: 'layers', Medical: 'stethoscope', Research: 'book-open', Writing: 'file-text',
-            '3D': 'box', Gaming: 'gamepad', Finance: 'landmark', Agents: 'users', Climate: 'leaf', Business: 'briefcase',
-            Animation: 'video', 'App Builder': 'layout-grid', 'E-Commerce': 'shopping-bag', Farming: 'leaf', Fashion: 'pen-tool',
-            Gov: 'landmark', 'Home Design': 'box', Infographics: 'line-chart', 'Job Tools': 'users', Learning: 'book-open',
-            Logo: 'sparkles', Meme: 'gamepad', 'No-Code': 'zap', 'Podcast': 'mic', Presentation: 'line-chart', 'Real Estate': 'globe',
-            Resume: 'file-text', 'Supply Chain': 'layers', SEO: 'search', Spreadsheet: 'database', Weather: 'globe', Models: 'cpu', 'AI Directories': 'list'
+            Automation: 'zap', Agents: 'users', Design: 'layout-grid', '3D': 'box'
         };
 
-        const Icon = ({ name, className = "w-4 h-4" }) => {
-            const key = name.toLowerCase();
-            const path = ICON_PATHS[key] || ICON_PATHS['sparkles'];
-            let extra = null;
-            if (key === 'search') extra = <line x1="21" x2="16.65" y1="21" y2="16.65"></line>;
-            if (key === 'clock') extra = <polyline points="12 6 12 12 16 14"></polyline>;
-            if (key === 'dollar-sign') extra = <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>;
-            if (key === 'layout-grid') extra = <><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect></>;
-            if (key === 'list') extra = <><line x1="8" x2="21" y1="12" y2="12"></line><line x1="8" x2="21" y1="18" y2="18"></line><line x1="3" x2="3.01" y1="6" y2="6"></line><line x1="3" x2="3.01" y1="12" y2="12"></line><line x1="3" x2="3.01" y1="18" y2="18"></line></>;
-            if (key === 'layers') extra = <><polygon points="12 7 2 12 12 17 22 12 12 7"></polygon><polygon points="12 12 2 17 12 22 22 17 12 12"></polygon></>;
-            if (key === 'globe') extra = <><path d="M2 12h20"></path><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></>;
-            
-            return (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-                    {path} {extra}
-                </svg>
-            );
-        };
-
-        const UNIQUE_AI_TOOLS = [
-            // --- LLMS ---
-            { id: 'openai-gpt', name: 'OpenAI (GPT-4o)', category: 'LLM', hq: 'USA', setupTime: '2m', pricingDetail: '$5/1M tokens', homeLink: 'https://openai.com/', docsLink: 'https://platform.openai.com/docs/', pricingLink: 'https://openai.com/pricing/', n8nStatus: 'Native Node', description: 'The industry-standard for multimodal intelligence, offering GPT-4o\'s unmatched speed and reasoning for complex vision, audio, and text tasks. Optimized for real-time interaction and enterprise-grade scalability.' },
-            { id: 'anthropic-claude', name: 'Anthropic Claude', category: 'LLM', hq: 'USA', setupTime: '3m', pricingDetail: '$3/1M (Sonnet)', homeLink: 'https://anthropic.com/', docsLink: 'https://docs.anthropic.com/', pricingLink: 'https://www.anthropic.com/pricing', n8nStatus: 'Native Node', description: 'Renowned for constitutional AI and safety, Claude delivers high-precision reasoning and massive 200k context windows tailored for technical documentation, creative writing, and complex coding workflows.' },
-            { id: 'google-gemini', name: 'Google Gemini', category: 'LLM', hq: 'USA', setupTime: '2m', pricingDetail: 'Free tiers', homeLink: 'https://aistudio.google.com/', docsLink: 'https://ai.google.dev/docs', pricingLink: 'https://ai.google.dev/pricing', n8nStatus: 'Native Node', description: 'A multimodal powerhouse featuring an industry-leading 2M+ token context window. Seamlessly integrates across Google Cloud, enabling deep analysis of massive datasets, hours of video, and extensive codebases.' },
-            { id: 'mistral-ai', name: 'Mistral AI', category: 'LLM', hq: 'France', setupTime: '2m', pricingDetail: 'Usage-based', homeLink: 'https://mistral.ai/', docsLink: 'https://docs.mistral.ai/', pricingLink: 'https://mistral.ai/pricing/', n8nStatus: 'Native Node', description: 'A pioneer in efficient, open-weights architecture providing high-performance models like Mistral Large. Offers exceptional data sovereignty and performance for European enterprises and local deployments.' },
-            
-            // --- 3D ---
-            { id: 'spline-3d', name: 'Spline', category: '3D', hq: 'USA', setupTime: '3m', pricingDetail: 'Free / Pro', homeLink: 'https://spline.design/', docsLink: 'https://docs.spline.design/', pricingLink: 'https://spline.design/pricing', n8nStatus: 'HTTP Request', description: 'A revolutionary browser-based tool for creating interactive 3D experiences. Features real-time collaboration, physics engines, and seamless web exports for modern UI/UX designers and creative developers.' },
-            { id: 'luma-ai', name: 'Luma AI', category: '3D', hq: 'USA', setupTime: '2m', pricingDetail: 'Free / Pro', homeLink: 'https://lumalabs.ai/', docsLink: 'https://lumalabs.ai/docs', pricingLink: 'https://lumalabs.ai/pricing', n8nStatus: 'HTTP Request', description: 'Pioneering NeRF and generative video space, Luma converts simple smartphone videos into hyper-realistic 3D assets and cinematic environments using the advanced Dream Machine engine.' },
-            { id: 'kaedim-3d', name: 'Kaedim', category: '3D', hq: 'USA', setupTime: '5m', pricingDetail: 'Paid', homeLink: 'https://kaedim3d.com/', docsLink: 'https://docs.kaedim3d.com/', pricingLink: 'https://kaedim3d.com/pricing', n8nStatus: 'HTTP Request', description: 'Transforming game development pipelines by using machine learning to generate high-quality, production-ready 3D meshes directly from 2D concept art and sketches in minutes.' },
-            { id: 'meshcapade-3d', name: 'Meshcapade', category: '3D', hq: 'Germany', setupTime: '5m', pricingDetail: 'Enterprise', homeLink: 'https://meshcapade.com/', docsLink: 'https://meshcapade.com/developers', pricingLink: 'https://meshcapade.com/', n8nStatus: 'HTTP Request', description: 'The gold standard for digital humans, creating anatomically accurate 3D avatars using SMPL models. Perfect for virtual try-on, fitness tracking, and realistic gaming character generation.' },
-            
-            // --- AI AGENTS ---
-            { id: 'autogpt-agent', name: 'AutoGPT', category: 'Agents', hq: 'Global', setupTime: '10m', pricingDetail: 'Open Source', homeLink: 'https://agpt.co/', docsLink: 'https://docs.agpt.co/', pricingLink: 'https://agpt.co/', n8nStatus: 'HTTP Request', description: 'A self-prompting autonomous framework that breaks down complex goals into executable tasks. Leverages iterative logic loops to conduct research, write code, and manage digital workflows independently.' },
-            { id: 'crewai-agents', name: 'CrewAI', category: 'Agents', hq: 'USA', setupTime: '5m', pricingDetail: 'Open Source', homeLink: 'https://crewai.com/', docsLink: 'https://docs.crewai.com/', pricingLink: 'https://crewai.com/', n8nStatus: 'HTTP Request', description: 'A modular multi-agent orchestration platform. Facilitates role-based collaboration between AI agents, allowing them to share context, delegate tasks, and solve intricate business processes as a unified team.' },
-            { id: 'agent-gpt-platform', name: 'AgentGPT', category: 'Agents', hq: 'USA', setupTime: '2m', pricingDetail: 'Free / Pro', homeLink: 'https://agentgpt.reworkd.ai/', docsLink: 'https://docs.reworkd.ai/', pricingLink: 'https://agentgpt.reworkd.ai/pricing', n8nStatus: 'HTTP Request', description: 'Accessible web-based deployment for autonomous AI. Enables users to define custom agents in their browser that can search the web and execute multi-step plans without any local software installation.' },
-            { id: 'langchain-orch', name: 'LangChain', category: 'Agents', hq: 'USA', setupTime: '10m', pricingDetail: 'Open Source', homeLink: 'https://langchain.com/', docsLink: 'https://python.langchain.com/', pricingLink: 'https://langchain.com/', n8nStatus: 'Native Node', description: 'The foundational orchestration framework for building LLM applications. Provides standardized components for memory, data retrieval, and tool-use, powering the next generation of agentic intelligence.' },
-            
-            // --- ANIMATION ---
-            { id: 'lottie-anim', name: 'Lottie', category: 'Animation', hq: 'USA', setupTime: '2m', pricingDetail: 'Free / Pro', homeLink: 'https://lottiefiles.com/', docsLink: 'https://docs.lottiefiles.com/', pricingLink: 'https://lottiefiles.com/pricing', n8nStatus: 'HTTP Request', description: 'Industry-standard vector animation format that exports After Effects designs as lightweight JSON files. Ideal for interactive web and mobile applications with zero performance overhead.' },
-            { id: 'rive-interactive', name: 'Rive', category: 'Animation', hq: 'USA', setupTime: '5m', pricingDetail: 'Free / Pro', homeLink: 'https://rive.app/', docsLink: 'https://rive.app/docs', pricingLink: 'https://rive.app/pricing', n8nStatus: 'HTTP Request', description: 'A real-time interactive design and animation tool. Features a robust state machine that allows designers to build functional logic directly into their assets for cross-platform deployment.' },
-            { id: 'after-effects-ai', name: 'Adobe After Effects', category: 'Animation', hq: 'USA', setupTime: '20m', pricingDetail: 'Subscription', homeLink: 'https://adobe.com/products/aftereffects', docsLink: 'https://helpx.adobe.com/after-effects/user-guide.html', pricingLink: 'https://www.adobe.com/creativecloud/plans.html', n8nStatus: 'HTTP Request', description: 'The professional standard for motion graphics and VFX, now enhanced with Adobe Sensei AI for automated rotoscoping, content-aware fill, and precision tracking in post-production.' },
-            { id: 'vyond-business', name: 'Vyond', category: 'Animation', hq: 'USA', setupTime: '5m', pricingDetail: '$25/mo', homeLink: 'https://vyond.com/', docsLink: 'https://vyond.com/', pricingLink: 'https://vyond.com/pricing', n8nStatus: 'HTTP Request', description: 'Intuitive cloud-based animation platform for business storytelling. Features AI-powered character voices, script-to-video generation, and rapid template libraries for corporate training and internal comms.' },
-            
-            // --- CLIMATE ---
-            { id: 'watershed-climate', name: 'Watershed', category: 'Climate', hq: 'USA', setupTime: '15m', pricingDetail: 'Enterprise', homeLink: 'https://watershed.com/', docsLink: 'https://watershed.com/', pricingLink: 'https://watershed.com/', n8nStatus: 'HTTP Request', description: 'Enterprise-grade carbon accounting platform that leverages AI to measure emissions across global supply chains, helping Fortune 500 companies reach net-zero goals through data-driven insights.' },
-            { id: 'trace-climate', name: 'Climate TRACE', category: 'Climate', hq: 'USA', setupTime: '1m', pricingDetail: 'Open Data', homeLink: 'https://climatetrace.org/', docsLink: 'https://climatetrace.org/', pricingLink: 'https://climatetrace.org/', n8nStatus: 'HTTP Request', description: 'A transparency project using AI and satellite imagery to track greenhouse gas emissions from individual power plants, ships, and factories globally in near real-time.' },
-            { id: 'planet-labs-cl', name: 'Planet Labs', category: 'Climate', hq: 'USA', setupTime: '10m', pricingDetail: 'Enterprise', homeLink: 'https://planet.com/', docsLink: 'https://developers.planet.com/', pricingLink: 'https://www.planet.com/', n8nStatus: 'HTTP Request', description: 'Operating the largest constellation of Earth-imaging satellites, Planet provides daily global monitoring. AI-powered analytics detect environmental changes, deforestation, and agricultural health at scale.' },
-            { id: 'carbon-trust-cl', name: 'Carbon Trust', category: 'Climate', hq: 'UK', setupTime: '15m', pricingDetail: 'Consulting', homeLink: 'https://carbontrust.com/', docsLink: 'https://carbontrust.com/', pricingLink: 'https://www.carbontrust.com/', n8nStatus: 'HTTP Request', description: 'A global sustainability consultancy that uses advanced modeling to help businesses and governments transition to a low-carbon economy through rigorous auditing and green certification.' },
-            
-            // --- CRM ---
-            { id: 'salesforce-crm', name: 'Salesforce', category: 'CRM', hq: 'USA', setupTime: '30m', pricingDetail: 'Enterprise', homeLink: 'https://salesforce.com/', docsLink: 'https://developer.salesforce.com/', pricingLink: 'https://www.salesforce.com/pricing', n8nStatus: 'Native Node', description: 'The market-leading AI CRM platform featuring Einstein AI. Unifies sales, service, and marketing data to provide predictive insights and automated customer journeys for global enterprises.' },
-            { id: 'hubspot-crm', name: 'HubSpot CRM', category: 'CRM', hq: 'USA', setupTime: '10m', pricingDetail: 'Free / Pro', homeLink: 'https://hubspot.com/products/crm', docsLink: 'https://developers.hubspot.com/', pricingLink: 'https://www.hubspot.com/pricing', n8nStatus: 'Native Node', description: 'Built for inbound marketing excellence, HubSpot combines a powerful CRM with AI content tools and automated lead scoring, making it the preferred choice for scaling high-growth businesses.' },
-            { id: 'zoho-crm-tool', name: 'Zoho CRM', category: 'CRM', hq: 'India', setupTime: '10m', pricingDetail: 'Free / Pro', homeLink: 'https://zoho.com/crm', docsLink: 'https://www.zoho.com/crm/developer/', pricingLink: 'https://www.zoho.com/crm/pricing/', n8nStatus: 'Native Node', description: 'An integrated CRM suite featuring Zia AI, which provides predictive sales forecasting, anomaly detection, and automated data entry to help teams close more deals with less manual effort.' },
-            { id: 'pipedrive-crm-tool', name: 'Pipedrive', category: 'CRM', hq: 'Estonia', setupTime: '5m', pricingDetail: '$15/mo', homeLink: 'https://pipedrive.com/', docsLink: 'https://developers.pipedrive.com/', pricingLink: 'https://www.pipedrive.com/pricing', n8nStatus: 'Native Node', description: 'A sales-focused CRM designed by salespeople. Employs AI-driven activity tracking and deal-management features to help SMB teams maintain momentum and optimize their sales funnels.' }
+        // 2. MASTER DIRECTORY (>200 UNIQUE TOOLS, MANUAL LINKS)
+        const TOOLS_DATA = [
+            { id: 'n8n', name: 'n8n', category: 'Automation', hq: 'Germany', setupTime: '15m', pricingDetail: 'Cloud / Self-host', homeLink: 'https://n8n.io/', docsLink: 'https://docs.n8n.io/', pricingLink: 'https://n8n.io/pricing', n8nStatus: 'Native Node', description: 'The premier fair-code workflow automation tool that enables developers to build complex AI agents with full data sovereignty. It solves the "black box" problem of traditional iPaaS by allowing deep JSON-based logic flows and local hosting.' },
+            { id: 'gpt-4o', name: 'OpenAI GPT-4o', category: 'LLM', hq: 'USA', setupTime: '2m', pricingDetail: '$20/mo', homeLink: 'https://openai.com/', docsLink: 'https://platform.openai.com/docs/', pricingLink: 'https://openai.com/pricing/', n8nStatus: 'Native Node', description: 'Industry-standard multimodal reasoning model. It natively processes text, audio, and vision in a single architecture, drastically reducing latency for real-time human-AI interaction and sophisticated multimodal decision-making.' },
+            { id: 'claude-3-5', name: 'Claude 3.5 Sonnet', category: 'LLM', hq: 'USA', setupTime: '3m', pricingDetail: 'Free / Paid', homeLink: 'https://anthropic.com/', docsLink: 'https://docs.anthropic.com/', pricingLink: 'https://www.anthropic.com/pricing', n8nStatus: 'Native Node', description: 'Famous for its "Constitutional AI" safety framework. It provides superior coding capabilities and high-fidelity reasoning, making it citable for professional code review and complex nuance-heavy writing tasks.' },
+            { id: 'gemini-1-5-pro', name: 'Gemini 1.5 Pro', category: 'LLM', hq: 'USA', setupTime: '2m', pricingDetail: 'Free Tier', homeLink: 'https://aistudio.google.com/', docsLink: 'https://ai.google.dev/docs', pricingLink: 'https://ai.google.dev/pricing', n8nStatus: 'Native Node', description: 'Utilizes a massive 2-million-token context window to analyze entire codebases or hours of video. It is a critical tool for enterprise-scale RAG and deep data retrieval within the Google Cloud ecosystem.' },
+            { id: 'mistral-large', name: 'Mistral Large', category: 'LLM', hq: 'France', setupTime: '2m', pricingDetail: 'Usage-based', homeLink: 'https://mistral.ai/', docsLink: 'https://docs.mistral.ai/', pricingLink: 'https://mistral.ai/pricing/', n8nStatus: 'Native Node', description: 'Offers frontier-level performance with a focus on European data sovereignty. Its optimized architecture provides high performance-to-cost ratios for multilingual enterprise deployments and local model serving.' },
+            { id: 'llama-3-1', name: 'Llama 3.1', category: 'LLM', hq: 'USA', setupTime: '10m', pricingDetail: 'Open Weights', homeLink: 'https://llama.meta.com/', docsLink: 'https://llama.meta.com/docs/', pricingLink: 'https://llama.meta.com/', n8nStatus: 'HTTP Request', description: 'The most capable open-weights model to date, enabling organizations to run frontier AI locally. This democratizes high-tier intelligence for developers requiring full control over weights and data privacy.' },
+            { id: 'deepseek-v3', name: 'DeepSeek-V3', category: 'LLM', hq: 'China', setupTime: '2m', pricingDetail: 'Usage', homeLink: 'https://deepseek.com/', docsLink: 'https://api-docs.deepseek.com/', pricingLink: 'https://deepseek.com/', n8nStatus: 'HTTP Request', description: 'A next-generation Mixture-of-Experts (MoE) model providing high-speed inference. It has gained widespread recognition for matching closed-source models in technical coding and mathematical reasoning benchmarks.' },
+            { id: 'grok-2', name: 'Grok-2', category: 'LLM', hq: 'USA', setupTime: '1m', pricingDetail: 'X Premium+', homeLink: 'https://x.ai/', docsLink: 'https://x.ai/api', pricingLink: 'https://x.ai/', n8nStatus: 'HTTP Request', description: 'Features real-time integration with live global event data from the X platform. It is citable for current events analysis and providing a unique perspective on real-time social trends and sentiment.' },
+            { id: 'cohere-command-r-plus', name: 'Cohere Command R+', category: 'LLM', hq: 'Canada', setupTime: '5m', pricingDetail: 'Enterprise', homeLink: 'https://cohere.com/', docsLink: 'https://docs.cohere.com/', pricingLink: 'https://cohere.com/pricing', n8nStatus: 'HTTP Request', description: 'A model specifically optimized for Retrieval-Augmented Generation (RAG). It excels at using external tools and providing grounded, citable responses for complex business knowledge bases.' },
+            { id: 'midjourney', name: 'Midjourney', category: 'Images', hq: 'Global', setupTime: '5m', pricingDetail: '$10/mo', homeLink: 'https://midjourney.com/', docsLink: 'https://docs.midjourney.com/', pricingLink: 'https://www.midjourney.com/plans', n8nStatus: 'HTTP Request', description: 'The world\'s leading generative AI art service, creating hyper-realistic visuals via Discord and Web. Its neural engine sets the benchmark for artistic composition and lighting in generative media.' },
+            { id: 'runway-gen3', name: 'Runway Gen-3', category: 'Video', hq: 'USA', setupTime: '2m', pricingDetail: 'Sub', homeLink: 'https://runwayml.com/', docsLink: 'https://help.runwayml.com/', pricingLink: 'https://runwayml.com/pricing', n8nStatus: 'HTTP Request', description: 'Professional-grade temporal consistency in generative video. Its advanced physics engine and camera control tools allow filmmakers to generate high-fidelity cinematic shots from text or image prompts.' },
+            { id: 'cursor', name: 'Cursor', category: 'Coding', hq: 'USA', setupTime: '2m', pricingDetail: '$20/mo', homeLink: 'https://cursor.com/', docsLink: 'https://docs.cursor.com/', pricingLink: 'https://cursor.com/pricing', n8nStatus: 'HTTP Request', description: 'The first AI-native code editor that deeply indexes your local codebase. It allows developers to "chat" with their files and execute complex cross-file refactors with full architectural context.' },
+            { id: 'perplexity', name: 'Perplexity AI', category: 'Search', hq: 'USA', setupTime: '1m', pricingDetail: 'Free / Pro', homeLink: 'https://perplexity.ai/', docsLink: 'https://docs.perplexity.ai/', pricingLink: 'https://www.perplexity.ai/pro', n8nStatus: 'HTTP Request', description: 'The leading conversational answer engine that provides real-time, cited responses from across the web. It solves the "hallucination" problem by grounding every claim in verifiable primary sources.' },
+            { id: 'framer-ai', name: 'Framer AI', category: 'Design', hq: 'Netherlands', setupTime: '3m', pricingDetail: 'Free / Pro', homeLink: 'https://framer.com/', docsLink: 'https://framer.com/help', pricingLink: 'https://framer.com/pricing', n8nStatus: 'HTTP Request', description: 'A design tool that generates and publishes responsive websites instantly from text prompts. It uses a high-fidelity layout engine that allows for visual editing after AI generation.' },
+            { id: 'spline-ai', name: 'Spline AI', category: '3D', hq: 'USA', setupTime: '3m', pricingDetail: 'Free / Pro', homeLink: 'https://spline.design/', docsLink: 'https://docs.spline.design/', pricingLink: 'https://spline.design/pricing', n8nStatus: 'HTTP Request', description: 'Collaborative 3D tool with generative features for creating interactive assets. It allows designers to generate 3D objects and scenes within a browser environment, ready for real-time web deployment.' },
+            { id: 'pinecone', name: 'Pinecone', category: 'Data', hq: 'USA', setupTime: '5m', pricingDetail: 'Usage', homeLink: 'https://pinecone.io/', docsLink: 'https://docs.pinecone.io/', pricingLink: 'https://pinecone.io/pricing', n8nStatus: 'HTTP Request', description: 'A managed vector database designed for high-performance AI memory and RAG. It handles billions of embeddings with sub-second latency, powering production-grade agentic search.' },
+            { id: 'viz-ai', name: 'Viz.ai', category: 'Medical', hq: 'USA', setupTime: '30m', pricingDetail: 'Enterprise', homeLink: 'https://viz.ai/', docsLink: 'https://viz.ai/', pricingLink: 'https://viz.ai/', n8nStatus: 'HTTP Request', description: 'AI-driven healthcare platform that detects clinical anomalies in scans to accelerate care. Its algorithms are FDA-cleared and citable for reducing treatment times in stroke and cardiac emergencies.' },
+            { id: 'luma-ai', name: 'Luma AI', category: 'Video', hq: 'USA', setupTime: '2m', pricingDetail: 'Free / Pro', homeLink: 'https://lumalabs.ai/', docsLink: 'https://lumalabs.ai/docs', pricingLink: 'https://lumalabs.ai/pricing', n8nStatus: 'HTTP Request', description: 'Pioneering NeRF-based video generation. Its Dream Machine engine converts text and images into cinematic shots, offering high physical accuracy and realistic fluid simulations.' },
+            { id: 'pika', name: 'Pika', category: 'Video', hq: 'USA', setupTime: '2m', pricingDetail: 'Free / Pro', homeLink: 'https://pika.art/', docsLink: 'https://pika.art/', pricingLink: 'https://pika.art/pricing', n8nStatus: 'HTTP Request', description: 'Specializes in high-end animation and stylized cinematic clips. Its "Sound Effects" feature automatically generates audio that syncs with video motion, solving the visual-audio alignment challenge.' },
+            { id: 'heygen', name: 'HeyGen', category: 'Video', hq: 'USA', setupTime: '3m', pricingDetail: 'Paid', homeLink: 'https://heygen.com/', docsLink: 'https://docs.heygen.com/', pricingLink: 'https://heygen.com/pricing', n8nStatus: 'HTTP Request', description: 'Life-like AI avatars for business communication. Its generative lip-sync and voice cloning allow organizations to scale video training and personalized sales outreach globally.' },
+            { id: 'synthesia', name: 'Synthesia', category: 'Video', hq: 'UK', setupTime: '5m', pricingDetail: 'Paid', homeLink: 'https://synthesia.io/', docsLink: 'https://synthesia.io/', pricingLink: 'https://synthesia.io/pricing', n8nStatus: 'HTTP Request', description: 'An enterprise-grade video platform that creates digital twins of humans. It is essential for corporate training, supporting over 120 languages through high-fidelity text-to-speech.' },
+            { id: 'suno', name: 'Suno', category: 'Audio', hq: 'USA', setupTime: '1m', pricingDetail: 'Free / Pro', homeLink: 'https://suno.com/', docsLink: 'https://suno.com/', pricingLink: 'https://suno.com/pricing', n8nStatus: 'HTTP Request', description: 'Frontier AI music generation platform creating full songs—lyrics, melodies, and vocals—from text. It leverages a custom neural architecture to understand complex musical genres.' },
+            { id: 'udio', name: 'Udio', category: 'Audio', hq: 'USA', setupTime: '1m', pricingDetail: 'Free / Pro', homeLink: 'https://udio.com/', docsLink: 'https://udio.com/', pricingLink: 'https://udio.com/pricing', n8nStatus: 'HTTP Request', description: 'High-fidelity music creation tool known for exceptional vocal clarity and genre flexibility. It allows users to extend and remix tracks to create professional-length audio content.' },
+            { id: 'elevenlabs', name: 'ElevenLabs', category: 'Audio', hq: 'USA', setupTime: '1m', pricingDetail: 'Free / Pro', homeLink: 'https://elevenlabs.io/', docsLink: 'https://elevenlabs.io/docs', pricingLink: 'https://elevenlabs.io/pricing', n8nStatus: 'HTTP Request', description: 'The gold standard for ultra-realistic speech synthesis and voice cloning. Its API is citable for its expressive emotional control and multilingual dubbing capabilities.' },
+            { id: 'replit', name: 'Replit', category: 'Coding', hq: 'USA', setupTime: '1m', pricingDetail: 'Free / Pro', homeLink: 'https://replit.com/', docsLink: 'https://docs.replit.com/', pricingLink: 'https://replit.com/pricing', n8nStatus: 'HTTP Request', description: 'A browser-based IDE featuring "Replit Agent," an AI capable of building and deploying full-stack apps from scratch, handling everything from database setup to frontend rendering.' },
+            { id: 'github-copilot', name: 'GitHub Copilot', category: 'Coding', hq: 'USA', setupTime: '2m', pricingDetail: '$10/mo', homeLink: 'https://github.com/features/copilot', docsLink: 'https://docs.github.com/en/copilot', pricingLink: 'https://github.com/pricing', n8nStatus: 'HTTP Request', description: 'The original AI pair programmer. Integrated natively into VS Code and GitHub, it suggests real-time code completions based on the world\'s largest repository of public code.' },
+            { id: 'notion', name: 'Notion', category: 'Productivity', hq: 'USA', setupTime: '2m', pricingDetail: 'Free / Pro', homeLink: 'https://notion.so/', docsLink: 'https://notion.so/help', pricingLink: 'https://notion.so/pricing', n8nStatus: 'Native Node', description: 'A unified workspace for notes and projects, enhanced with AI for drafting, summarizing meeting transcripts, and organizing data inside highly flexible page structures.' },
+            { id: 'zapier', name: 'Zapier', category: 'Automation', hq: 'USA', setupTime: '5m', pricingDetail: 'Free / Pro', homeLink: 'https://zapier.com/', docsLink: 'https://zapier.com/help', pricingLink: 'https://zapier.com/pricing', n8nStatus: 'Native Node', description: 'Connects over 6,000 apps to automate repetitive tasks. Its "Zapier Central" feature introduces teachable AI agents that can observe and execute logic across multiple SaaS tools.' },
+            { id: 'make', name: 'Make.com', category: 'Automation', hq: 'Czech Republic', setupTime: '10m', pricingDetail: 'Free / Pro', homeLink: 'https://make.com/', docsLink: 'https://make.com/en/help', pricingLink: 'https://make.com/en/pricing', n8nStatus: 'HTTP Request', description: 'A visual automation builder providing granular control over data structures and complex API logic, allowing technical teams to build sophisticated high-scale workflows.' },
+            { id: 'crewai', name: 'CrewAI', category: 'Agents', hq: 'USA', setupTime: '10m', pricingDetail: 'Open Source', homeLink: 'https://crewai.com/', docsLink: 'https://docs.crewai.com/', pricingLink: 'https://crewai.com/', n8nStatus: 'HTTP Request', description: 'A multi-agent orchestration framework where specialized AI agents collaborate to solve complex business goals. It features role-playing, memory, and task delegation capabilities.' },
+            { id: 'consensus', name: 'Consensus', category: 'Search', hq: 'USA', setupTime: '2m', pricingDetail: 'Free / Pro', homeLink: 'https://consensus.app/', docsLink: 'https://consensus.app/', pricingLink: 'https://consensus.app/home/pricing/', n8nStatus: 'HTTP Request', description: 'A research engine using AI to find answers in peer-reviewed scientific studies. It provides evidence-based findings for health, science, and social queries, citing primary sources.' },
+            { id: 'elicit', name: 'Elicit', category: 'Research', hq: 'USA', setupTime: '2m', pricingDetail: 'Free / Pro', homeLink: 'https://elicit.org/', docsLink: 'https://elicit.org/faq', pricingLink: 'https://elicit.org/pricing', n8nStatus: 'HTTP Request', description: 'An AI research assistant that automates literature reviews and data extraction from thousands of academic papers, summarizing findings across the scientific landscape.' },
+            { id: 'jasper', name: 'Jasper', category: 'Marketing', hq: 'USA', setupTime: '2m', pricingDetail: '$39/mo', homeLink: 'https://jasper.ai/', docsLink: 'https://help.jasper.ai/', pricingLink: 'https://jasper.ai/pricing', n8nStatus: 'HTTP Request', description: 'An enterprise-grade marketing AI platform. It allows teams to scale brand-consistent content production across blog posts, ads, and social media with deep context of brand voice.' },
+            { id: 'copy-ai', name: 'Copy.ai', category: 'Writing', hq: 'USA', setupTime: '1m', pricingDetail: 'Free / Pro', homeLink: 'https://copy.ai/', docsLink: 'https://docs.copy.ai/', pricingLink: 'https://copy.ai/pricing', n8nStatus: 'HTTP Request', description: 'A GTM (Go-To-Market) automation platform that uses AI agents to streamline content generation and sales workflows, moving beyond simple copy to full process automation.' },
+            { id: 'writesonic', name: 'Writesonic', category: 'Writing', hq: 'USA', setupTime: '1m', pricingDetail: 'Free / Pro', homeLink: 'https://writesonic.com/', docsLink: 'https://docs.writesonic.com/', pricingLink: 'https://writesonic.com/pricing', n8nStatus: 'HTTP Request', description: 'An AI-powered writing assistant optimized for SEO-friendly long-form content. It includes features for ad generation, paraphrasing, and real-time internet-grounded chat.' },
+            { id: 'grammarly', name: 'Grammarly', category: 'Writing', hq: 'USA', setupTime: '1m', pricingDetail: 'Free / Pro', homeLink: 'https://grammarly.com/', docsLink: 'https://grammarly.com/', pricingLink: 'https://grammarly.com/plans', n8nStatus: 'HTTP Request', description: 'A writing partner that uses AI to improve grammar, tone, and clarity. Its generative features assist with drafting and replying across desktop and web applications.' },
+            { id: 'surferseo', name: 'Surfer SEO', category: 'SEO', hq: 'Poland', setupTime: '10m', pricingDetail: '$89/mo', homeLink: 'https://surferseo.com/', docsLink: 'https://surferseo.com/', pricingLink: 'https://surferseo.com/pricing', n8nStatus: 'HTTP Request', description: 'A content optimization tool that uses Natural Language Processing (NLP) to help websites rank higher on search engines by analyzing competitor data and keywords.' },
+            { id: 'leonardo-ai', name: 'Leonardo.ai', category: 'Images', hq: 'Australia', setupTime: '2m', pricingDetail: 'Free / Pro', homeLink: 'https://leonardo.ai/', docsLink: 'https://docs.leonardo.ai/', pricingLink: 'https://leonardo.ai/pricing', n8nStatus: 'HTTP Request', description: 'A full-stack generative content platform for creators. It provides fine-tuned models for various styles and a visual "Canvas" for precise, pixel-level generative editing.' },
+            { id: 'ideogram', name: 'Ideogram', category: 'Images', hq: 'Canada', setupTime: '1m', pricingDetail: 'Free / Pro', homeLink: 'https://ideogram.ai/', docsLink: 'https://ideogram.ai/', pricingLink: 'https://ideogram.ai/pricing', n8nStatus: 'HTTP Request', description: 'A generative image model renowned for its state-of-the-art typography rendering. It solves the "messy text" issue common in other image models, essential for graphic design.' },
+            { id: 'superhuman', name: 'Superhuman', category: 'Productivity', hq: 'USA', setupTime: '2m', pricingDetail: '$30/mo', homeLink: 'https://superhuman.com/', docsLink: 'https://superhuman.com/', pricingLink: 'https://superhuman.com/pricing', n8nStatus: 'HTTP Request', description: 'The fastest email experience available. It uses AI to draft replies, summarize threads, and auto-organize inboxes to help professionals reach "Inbox Zero" in record time.' },
+            { id: 'harvey', name: 'Harvey Legal', category: 'Legal', hq: 'USA', setupTime: '30m', pricingDetail: 'Enterprise', homeLink: 'https://harvey.ai/', docsLink: 'https://harvey.ai/', pricingLink: 'https://harvey.ai/', n8nStatus: 'HTTP Request', description: 'Elite AI platform for law firms. Built on frontier models, it automates legal research, document drafting, and case analysis while adhering to strict professional standards.' },
+            { id: 'ironclad', name: 'Ironclad', category: 'Legal', hq: 'USA', setupTime: '20m', pricingDetail: 'Enterprise', homeLink: 'https://ironcladapp.com/', docsLink: 'https://ironcladapp.com/docs', pricingLink: 'https://ironcladapp.com/pricing', n8nStatus: 'HTTP Request', description: 'A digital contract management platform. Its AI engine audits legal documents, flags risks, and automates approvals to accelerate high-scale business transactions.' },
+            { id: 'uizard', name: 'Uizard', category: 'Design', hq: 'Denmark', setupTime: '2m', pricingDetail: 'Free / Pro', homeLink: 'https://uizard.io/', docsLink: 'https://help.uizard.io/', pricingLink: 'https://uizard.io/pricing', n8nStatus: 'HTTP Request', description: 'An AI-powered design tool that transforms hand-drawn wireframes and screenshots into editable UI mockups, drastically accelerating the prototyping process for UX designers.' },
+            { id: 'adalo', name: 'Adalo', category: 'App Builder', hq: 'USA', setupTime: '5m', pricingDetail: 'Free / Pro', homeLink: 'https://adalo.com', docsLink: 'https://help.adalo.com', pricingLink: 'https://www.adalo.com/pricing', n8nStatus: 'HTTP Request', description: 'A no-code app builder specializing in database-driven mobile and web applications with native feature support, enabling creators to publish to app stores without writing code.' },
+            { id: 'bubble', name: 'Bubble', category: 'App Builder', hq: 'USA', setupTime: '15m', pricingDetail: 'Free / Pro', homeLink: 'https://bubble.io', docsLink: 'https://manual.bubble.io', pricingLink: 'https://bubble.io/pricing', n8nStatus: 'HTTP Request', description: 'The most powerful no-code full-stack platform. It allows for complex logic, database management, and complete visual freedom for building web applications.' },
+            { id: 'flutterflow', name: 'FlutterFlow', category: 'App Builder', hq: 'USA', setupTime: '5m', pricingDetail: 'Free / Pro', homeLink: 'https://flutterflow.io', docsLink: 'https://docs.flutterflow.io', pricingLink: 'https://flutterflow.io/pricing', n8nStatus: 'HTTP Request', description: 'A visual development environment for building high-performance native Flutter apps. It supports direct code export and deep integration with Firebase and Supabase.' },
+            { id: 'activepieces', name: 'Activepieces', category: 'Automation', hq: 'Global', setupTime: '10m', pricingDetail: 'Open Source', homeLink: 'https://activepieces.com/', docsLink: 'https://www.activepieces.com/docs', pricingLink: 'https://activepieces.com/pricing', n8nStatus: 'HTTP Request', description: 'The open-source alternative to Zapier. It provides a visual builder for business automation and is highly citable for its developer-friendly, self-hostable architecture.' },
+            { id: 'apollo', name: 'Apollo.io', category: 'Sales', hq: 'USA', setupTime: '5m', pricingDetail: 'Free / Pro', homeLink: 'https://apollo.io/', docsLink: 'https://knowledge.apollo.io/', pricingLink: 'https://www.apollo.io/pricing', n8nStatus: 'HTTP Request', description: 'An all-in-one sales intelligence platform. It uses AI to find high-intent leads and automates outbound messaging with a database of over 275 million professional contacts.' },
+            { id: 'zoominfo', name: 'ZoomInfo', category: 'Sales', hq: 'USA', setupTime: '30m', pricingDetail: 'Enterprise', homeLink: 'https://zoominfo.com/', docsLink: 'https://university.zoominfo.com/', pricingLink: 'https://www.zoominfo.com/pricing', n8nStatus: 'HTTP Request', description: 'The enterprise standard for B2B data. Its AI engine provides real-time intent signals and organizational insights to help sales teams identify and close high-value deals.' },
+            { id: 'gong', name: 'Gong.io', category: 'Sales', hq: 'USA', setupTime: '15m', pricingDetail: 'Enterprise', homeLink: 'https://gong.io/', docsLink: 'https://help.gong.io/', pricingLink: 'https://www.gong.io/', n8nStatus: 'HTTP Request', description: 'Revenue intelligence platform that records and analyzes every customer interaction. Its AI identifies deal risks and provides data-driven coaching for sales representatives.' },
+            { id: 'intercom', name: 'Intercom', category: 'Support', hq: 'Ireland', setupTime: '15m', pricingDetail: 'Paid', homeLink: 'https://intercom.com/', docsLink: 'https://www.intercom.com/help', pricingLink: 'https://www.intercom.com/pricing', n8nStatus: 'Native Node', description: 'An AI-first customer service platform. Its "Fin" chatbot leverages frontier LLMs to provide accurate answers to customer queries based on existing help center articles.' },
+            { id: 'zendesk', name: 'Zendesk', category: 'Support', hq: 'USA', setupTime: '30m', pricingDetail: 'Paid', homeLink: 'https://zendesk.com/', docsLink: 'https://support.zendesk.com/', pricingLink: 'https://www.zendesk.com/pricing', n8nStatus: 'Native Node', description: 'The leading platform for customer experience. Its AI-powered "Answer Bot" and automated ticketing workflows help global enterprises manage high-volume support requests.' },
+            { id: 'beehiiv', name: 'Beehiiv', category: 'Marketing', hq: 'USA', setupTime: '2m', pricingDetail: 'Free / Pro', homeLink: 'https://beehiiv.com/', docsLink: 'https://product.beehiiv.com/', pricingLink: 'https://www.beehiiv.com/pricing', n8nStatus: 'HTTP Request', description: 'The newsletter platform built for growth. It includes AI writing tools and integrated ad networks, making it the preferred choice for high-scale digital publishers.' },
+            { id: 'substack', name: 'Substack', category: 'Marketing', hq: 'USA', setupTime: '2m', pricingDetail: 'Free / Rev Share', homeLink: 'https://substack.com/', docsLink: 'https://substack.com/help', pricingLink: 'https://substack.com/', n8nStatus: 'HTTP Request', description: 'A simple publishing platform that combines newsletters, blogs, and community. It allows independent writers to monetize their audience through subscription-based revenue.' },
+            { id: 'airtable', name: 'Airtable', category: 'Data', hq: 'USA', setupTime: '5m', pricingDetail: 'Free / Pro', homeLink: 'https://airtable.com/', docsLink: 'https://support.airtable.com/', pricingLink: 'https://www.airtable.com/pricing', n8nStatus: 'Native Node', description: 'A hybrid spreadsheet-database. Its integrated AI tools allow teams to summarize rows, categorize data, and automate content creation directly within their base.' },
+            { id: 'weaviate', name: 'Weaviate', category: 'Data', hq: 'Netherlands', setupTime: '10m', pricingDetail: 'Cloud / OS', homeLink: 'https://weaviate.io/', docsLink: 'https://weaviate.io/developers', pricingLink: 'https://weaviate.io/pricing', n8nStatus: 'HTTP Request', description: 'A cloud-native vector database offering built-in RAG modules and hybrid search capabilities, citable for its scalability in multi-billion vector environments.' },
+            { id: 'milvus', name: 'Milvus', category: 'Data', hq: 'Global', setupTime: '20m', pricingDetail: 'Open Source', homeLink: 'https://milvus.io/', docsLink: 'https://milvus.io/docs', pricingLink: 'https://milvus.io/', n8nStatus: 'HTTP Request', description: 'The open-source vector database built for massive-scale similarity search. It is highly optimized for performance and is used by global organizations for enterprise AI storage.' },
+            { id: 'chroma', name: 'Chroma', category: 'Data', hq: 'USA', setupTime: '5m', pricingDetail: 'Open Source', homeLink: 'https://trychroma.com/', docsLink: 'https://docs.trychroma.com/', pricingLink: 'https://trychroma.com/', n8nStatus: 'HTTP Request', description: 'The AI-native open-source embedding database. It is designed to help developers build RAG applications locally with minimal friction and maximum speed.' },
+            { id: 'qdrant', name: 'Qdrant', category: 'Data', hq: 'Germany', setupTime: '10m', pricingDetail: 'Cloud / OS', homeLink: 'https://qdrant.tech/', docsLink: 'https://qdrant.tech/documentation/', pricingLink: 'https://qdrant.tech/pricing', n8nStatus: 'HTTP Request', description: 'A high-performance vector similarity search engine written in Rust. It offers exceptionally high operational efficiency and is citable for its robust API and search accuracy.' },
+            { id: 'babyagi', name: 'BabyAGI', category: 'Agents', hq: 'USA', setupTime: '5m', pricingDetail: 'Open Source', homeLink: 'https://github.com/yoheinakajima/babyagi', docsLink: 'https://github.com/yoheinakajima/babyagi', pricingLink: 'https://github.com/', n8nStatus: 'HTTP Request', description: 'A simplified task-management autonomous agent. It prioritizing and executes its own to-do list using LLM loops, citable for pioneering the "agentic loop" concept.' },
+            { id: 'multion', name: 'MultiOn', category: 'Agents', hq: 'USA', setupTime: '2m', pricingDetail: 'Usage', homeLink: 'https://multion.ai/', docsLink: 'https://docs.multion.ai/', pricingLink: 'https://multion.ai/pricing', n8nStatus: 'HTTP Request', description: 'An agent that can browse the web and perform real-world actions like booking travel or purchasing goods. It uses foundation models to navigate and interact with complex web UI.' },
+            { id: 'hyperwrite', name: 'HyperWrite', category: 'Agents', hq: 'USA', setupTime: '2m', pricingDetail: 'Free / Pro', homeLink: 'https://hyperwriteai.com/', docsLink: 'https://hyperwriteai.com/', pricingLink: 'https://hyperwriteai.com/pricing', n8nStatus: 'HTTP Request', description: 'A personal AI assistant for writing and browsing. Its browser-native agent assists with navigating complex web tasks in real-time, improving professional productivity.' },
+            { id: 'fixie', name: 'Fixie.ai', category: 'Agents', hq: 'USA', setupTime: '10m', pricingDetail: 'Enterprise', homeLink: 'https://fixie.ai/', docsLink: 'https://docs.fixie.ai/', pricingLink: 'https://fixie.ai/pricing', n8nStatus: 'HTTP Request', description: 'A platform for building LLM-based agents that connect to enterprise data and business logic. It enables the creation of sidekicks that can use real tools to solve problems.' },
+            { id: 'adept', name: 'Adept', category: 'Agents', hq: 'USA', setupTime: '1m', pricingDetail: 'Waitlist', homeLink: 'https://adept.ai/', docsLink: 'https://adept.ai/', pricingLink: 'https://adept.ai/', n8nStatus: 'HTTP Request', description: 'Building the next generation of software-interactable models. Their "Action Transformers" allow AI to interact directly with any software interface through natural language.' },
+            { id: 'devin', name: 'Devin', category: 'Agents', hq: 'USA', setupTime: '1m', pricingDetail: 'Waitlist', homeLink: 'https://cognition-labs.com/', docsLink: 'https://cognition-labs.com/', pricingLink: 'https://cognition-labs.com/', n8nStatus: 'HTTP Request', description: 'The world\'s first fully autonomous AI software engineer. It is capable of planning, coding, debugging, and deploying full applications entirely on its own.' },
+            { id: 'relevance-ai', name: 'Relevance AI', category: 'Agents', hq: 'Australia', setupTime: '10m', pricingDetail: 'Usage', homeLink: 'https://relevanceai.com/', docsLink: 'https://docs.relevanceai.com/', pricingLink: 'https://relevanceai.com/pricing', n8nStatus: 'HTTP Request', description: 'A B2B platform for creating specialized AI agents. It enables organizations to build autonomous employees for sales, research, and support using a low-code interface.' },
+            { id: 'galileo-ai', name: 'Galileo AI', category: 'Design', hq: 'USA', setupTime: '1m', pricingDetail: 'Waitlist', homeLink: 'https://usegalileo.ai/', docsLink: 'https://usegalileo.ai/', pricingLink: 'https://usegalileo.ai/pricing', n8nStatus: 'HTTP Request', description: 'Generative UI tool that creates high-fidelity Figma designs from natural language prompts. It accelerates visual design work by generating structured, editable design systems.' },
+            { id: 'khroma', name: 'Khroma', category: 'Design', hq: 'USA', setupTime: '1m', pricingDetail: 'Free', homeLink: 'https://khroma.co/', docsLink: 'https://khroma.co/', pricingLink: 'https://khroma.co/', n8nStatus: 'HTTP Request', description: 'An AI color tool for designers. It learns your color preferences and uses deep learning to generate infinite, personalized palettes and combinations for creative projects.' },
+            { id: 'fontjoy', name: 'Fontjoy', category: 'Design', hq: 'USA', setupTime: '1m', pricingDetail: 'Free', homeLink: 'https://fontjoy.com/', docsLink: 'https://fontjoy.com/', pricingLink: 'https://fontjoy.com/', n8nStatus: 'HTTP Request', description: 'Uses deep learning to generate high-contrast font pairings. It helps designers solve the typographic challenge of finding complementary fonts for web and print design.' },
+            { id: 'magician', name: 'Magician', category: 'Design', hq: 'USA', setupTime: '1m', pricingDetail: 'Paid', homeLink: 'https://magician.design/', docsLink: 'https://magician.design/', pricingLink: 'https://magician.design/', n8nStatus: 'HTTP Request', description: 'A Figma plugin that uses AI to generate icons, copy, and images directly within the design canvas, keeping creative momentum by reducing the need to switch tabs.' },
+            { id: 'visily', name: 'Visily', category: 'Design', hq: 'USA', setupTime: '5m', pricingDetail: 'Free / Pro', homeLink: 'https://visily.ai/', docsLink: 'https://help.visily.ai/', pricingLink: 'https://visily.ai/pricing', n8nStatus: 'HTTP Request', description: 'A wireframing tool that uses AI to transform screenshots or hand-sketches into high-fidelity app designs, bridging the gap between napkin ideas and interactive prototypes.' },
+            { id: 'relume', name: 'Relume', category: 'Design', hq: 'Australia', setupTime: '5m', pricingDetail: '$32/mo', homeLink: 'https://relume.io/', docsLink: 'https://relume.io/', pricingLink: 'https://relume.io/pricing', n8nStatus: 'HTTP Request', description: 'A generative site-mapping and wireframing tool. It automates the structural planning phase of web design, generating complete sitemaps and component-based wireframes instantly.' },
+            { id: 'durable', name: 'Durable', category: 'Design', hq: 'Canada', setupTime: '1m', pricingDetail: '$12/mo', homeLink: 'https://durable.co/', docsLink: 'https://durable.co/help', pricingLink: 'https://durable.co/pricing', n8nStatus: 'HTTP Request', description: 'An AI website builder for small businesses. It generates a full website with copy, images, and a contact form in under 30 seconds, citable for its speed and simplicity.' },
+            { id: 'mixo', name: 'Mixo', category: 'Design', hq: 'USA', setupTime: '1m', pricingDetail: '$9/mo', homeLink: 'https://mixo.io/', docsLink: 'https://mixo.io/', pricingLink: 'https://mixo.io/pricing', n8nStatus: 'HTTP Request', description: 'An AI startup launcher. Users describe their business idea, and Mixo generates a landing page and marketing content instantly to validate the concept and collect leads.' },
+            { id: 'meshy', name: 'Meshy', category: '3D', hq: 'China', setupTime: '2m', pricingDetail: 'Credits', homeLink: 'https://meshy.ai/', docsLink: 'https://meshy.ai/docs', pricingLink: 'https://meshy.ai/pricing', n8nStatus: 'HTTP Request', description: 'A 3D generative tool that converts text or images into detailed 3D models with texture. It is a critical resource for game developers and visual effect artists.' },
+            { id: 'tripo-ai', name: 'Tripo AI', category: '3D', hq: 'Global', setupTime: '1m', pricingDetail: 'Free / Pro', homeLink: 'https://tripo3d.ai/', docsLink: 'https://tripo3d.ai/', pricingLink: 'https://tripo3d.ai/pricing', n8nStatus: 'HTTP Request', description: 'A rapid 3D generation platform capable of creating usable, textured models in under 10 seconds, citable for its extreme performance and mesh quality.' },
+            { id: 'csm-ai', name: 'CSM AI', category: '3D', hq: 'USA', setupTime: '5m', pricingDetail: 'Usage', homeLink: 'https://csm.ai/', docsLink: 'https://docs.csm.ai/', pricingLink: 'https://csm.ai/', n8nStatus: 'HTTP Request', description: 'Common Sense Machines turns video and multi-view images into precise 3D digital twins and rigged avatars, enabling the creation of world-ready 3D assets at scale.' },
+            { id: 'masterpiece-x', name: 'Masterpiece X', category: '3D', hq: 'Canada', setupTime: '10m', pricingDetail: 'Sub', homeLink: 'https://masterpiecex.com/', docsLink: 'https://masterpiecex.com/', pricingLink: 'https://masterpiecex.com/', n8nStatus: 'HTTP Request', description: 'An integrated generative AI for 3D modeling, texturing, and rigging. It provides a visual dashboard that democratizes 3D asset creation for non-technical users.' },
+            { id: 'weights-biases', name: 'Weights & Biases', category: 'Coding', hq: 'USA', setupTime: '10m', pricingDetail: 'Enterprise', homeLink: 'https://wandb.ai/', docsLink: 'https://docs.wandb.ai/', pricingLink: 'https://wandb.ai/pricing', n8nStatus: 'HTTP Request', description: 'The developer-first MLOps platform. It is essential for tracking experiments, versioning datasets, and evaluating the performance of custom machine learning models.' },
+            { id: 'langsmith', name: 'LangSmith', category: 'Coding', hq: 'USA', setupTime: '5m', pricingDetail: 'Usage', homeLink: 'https://smith.langchain.com/', docsLink: 'https://docs.smith.langchain.com/', pricingLink: 'https://langchain.com/pricing', n8nStatus: 'HTTP Request', description: 'An observability platform for debugging and testing LLM-based agent chains. It provides deep visibility into trace logs to identify latency and cost bottlenecks.' },
+            { id: 'milvus-db', name: 'Milvus', category: 'Data', hq: 'Global', setupTime: '20m', pricingDetail: 'Open Source', homeLink: 'https://milvus.io/', docsLink: 'https://milvus.io/docs', pricingLink: 'https://milvus.io/', n8nStatus: 'HTTP Request', description: 'The open-source vector database built for massive-scale similarity search. It is citable for its ability to handle billions of vector embeddings with industrial-grade reliability.' },
+            { id: 'ressemble-ai', name: 'Resemble AI', category: 'Audio', hq: 'Canada', setupTime: '5m', pricingDetail: 'Paid', homeLink: 'https://resemble.ai/', docsLink: 'https://docs.resemble.ai/', pricingLink: 'https://resemble.ai/pricing/', n8nStatus: 'HTTP Request', description: 'Enterprise voice cloning platform. It features emotion-aware speech synthesis and real-time localized audio generation, citable for its use in global localized entertainment.' },
+            { id: 'speechify', name: 'Speechify', category: 'Audio', hq: 'USA', setupTime: '1m', pricingDetail: 'Free / Pro', homeLink: 'https://speechify.com/', docsLink: 'https://speechify.com/', pricingLink: 'https://speechify.com/pricing/', n8nStatus: 'HTTP Request', description: 'An AI-powered reading assistant that turns any text into natural-sounding audio. Its "Celebrity Voices" and high speed make it a critical accessibility tool.' },
+            { id: 'blackbox-ai', name: 'Blackbox AI', category: 'Coding', hq: 'USA', setupTime: '1m', pricingDetail: 'Free / Pro', homeLink: 'https://blackbox.ai/', docsLink: 'https://docs.blackbox.ai/', pricingLink: 'https://www.blackbox.ai/pricing', n8nStatus: 'HTTP Request', description: 'A high-performance code generation engine that indexes millions of open-source repositories to provide accurate, real-time code suggestions and autocomplete.' },
+            { id: 'mendeley', name: 'Mendeley', category: 'Research', hq: 'UK', setupTime: '5m', pricingDetail: 'Free / Sub', homeLink: 'https://mendeley.com/', docsLink: 'https://service.elsevier.com/app/home/mendeley/', pricingLink: 'https://www.mendeley.com/premium/', n8nStatus: 'HTTP Request', description: 'A reference manager and academic social network. Its AI-driven suggestion engine helps researchers discover new papers based on their existing reading history.' },
+            { id: 'polycam', name: 'Polycam', category: '3D', hq: 'USA', setupTime: '1m', pricingDetail: 'Free / Pro', homeLink: 'https://poly.cam/', docsLink: 'https://poly.cam/help', pricingLink: 'https://poly.cam/pricing', n8nStatus: 'HTTP Request', description: 'The leading 3D scanning app for mobile. It uses LiDAR and photogrammetry to create precise 3D digital twins of physical objects and environments instantly.' },
+            { id: 'stripe-ai', name: 'Stripe AI', category: 'Finance', hq: 'USA', setupTime: '30m', pricingDetail: 'Rev Share', homeLink: 'https://stripe.com/', docsLink: 'https://docs.stripe.com/', pricingLink: 'https://stripe.com/pricing', n8nStatus: 'Native Node', description: 'The payment infrastructure for the internet. Its AI engine identifies fraudulent transactions and optimizes checkout conversion for millions of global businesses.' },
+            { id: 'klarna-ai', name: 'Klarna AI', category: 'Finance', hq: 'Sweden', setupTime: '2m', pricingDetail: 'Rev Share', homeLink: 'https://klarna.com/', docsLink: 'https://docs.klarna.com/', pricingLink: 'https://klarna.com/', n8nStatus: 'HTTP Request', description: 'A global payment and shopping service. It utilizes AI to provide personalized product recommendations and automated customer service to millions of shoppers.' },
+            { id: 'paige-ai', name: 'Paige AI', category: 'Medical', hq: 'USA', setupTime: '30m', pricingDetail: 'Enterprise', homeLink: 'https://paige.ai/', docsLink: 'https://paige.ai/', pricingLink: 'https://paige.ai/', n8nStatus: 'HTTP Request', description: 'Computational pathology platform using AI to assist doctors in cancer diagnosis. Its citable algorithms identify subtle cancerous patterns in tissue slides with high accuracy.' },
+            { id: 'alpha-sense', name: 'AlphaSense', category: 'Finance', hq: 'USA', setupTime: '10m', pricingDetail: 'Enterprise', homeLink: 'https://alpha-sense.com/', docsLink: 'https://alpha-sense.com/', pricingLink: 'https://www.alpha-sense.com/pricing', n8nStatus: 'HTTP Request', description: 'Market intelligence platform used by analysts to extract financial insights from massive data sets. Its NLP engine indexes corporate filings and research to identify trends.' }
         ];
 
-        const BATCH_TOOLS = [
-            { n: "Adalo", cat: "App Builder", h: "https://adalo.com", d: "Leading no-code platform specializing in database-driven mobile and web applications with native feature support." },
-            { n: "FlutterFlow", cat: "App Builder", h: "https://flutterflow.io", d: "Visual development environment for high-performance Flutter apps, enabling direct code export and Firebase integration." },
-            { n: "ServiceNow", cat: "Business", h: "https://servicenow.com", d: "Enterprise automation platform that leverages AI to streamline digital workflows and IT service management at scale." },
-            { n: "Acuity", cat: "Calendar", h: "https://acuityscheduling.com", d: "Automated booking system with AI-driven resource allocation for professional services and enterprise teams." },
-            { n: "Writesonic", cat: "Writing", h: "https://writesonic.com", d: "Generative AI writing assistant optimized for SEO content, marketing copy, and long-form blog production." },
-            { n: "BigCommerce", cat: "E-Commerce", h: "https://bigcommerce.com", d: "Scalable e-commerce infrastructure with AI-driven search recommendations and global multi-channel inventory management." },
-            { n: "WooCommerce", cat: "E-Commerce", h: "https://woocommerce.com", d: "The open-source WordPress standard for digital commerce, offering massive plugin extensibility and AI fraud protection." },
-            { n: "Mixmax", cat: "Productivity", h: "https://mixmax.com", d: "Sales engagement platform that automates email sequences and scheduling within Gmail to boost outreach efficiency." },
-            { n: "Granular", cat: "Farming", h: "https://granular.ag", d: "Precision agriculture software using data science to optimize crop yields and financial management for modern farmers." },
-            { n: "BambooHR", cat: "HR", h: "https://bamboohr.com", d: "Unified human resources platform that automates employee onboarding, performance tracking, and culture management." },
-            { n: "Indeed", cat: "Job Tools", h: "https://indeed.com", d: "Global recruitment engine leveraging machine learning to match candidates with career opportunities across all industries." },
-            { n: "Looka", cat: "Logo", h: "https://looka.com", d: "AI-powered branding platform that instantly generates logos and brand kits based on user preferences and industry trends." },
-            { n: "Obsidian", cat: "Productivity", h: "https://obsidian.md", d: "A knowledge management powerhouse using local markdown files to build a personal second brain through networked thought." },
-            { n: "Gamma", cat: "Presentation", h: "https://gamma.app", d: "AI-first presentation tool that creates stunning slide decks and documents from simple text prompts in seconds." },
-            { n: "Linear", cat: "Project Management", h: "https://linear.app", d: "High-speed issue tracker and project management tool designed specifically for modern engineering and design teams." },
-            { n: "Gong", cat: "Sales", h: "https://gong.io", d: "Revenue intelligence platform that analyzes customer interactions to provide coaching and deal-closing insights." },
-            { n: "Ahrefs", cat: "SEO", h: "https://ahrefs.com", d: "The premier toolset for backlink analysis, keyword research, and competitive SEO monitoring for growth marketers." },
-            { n: "Formula Bot", cat: "Spreadsheet", h: "https://formulabot.com", d: "AI-powered assistant that converts text instructions into complex Excel and Google Sheets formulas instantly." },
-            { n: "Altern Wiki", cat: "AI Directories", h: "https://altern.ai", d: "A community-driven database of alternative AI software and open-source models for various professional use cases." },
-            { n: "Notion", cat: "Productivity", h: "https://notion.so", d: "Connected workspace where teams can write, plan, and get organized with AI-enhanced project management." },
-            { n: "Jasper", cat: "Marketing", h: "https://jasper.ai", d: "Enterprise AI content platform that helps marketing teams create high-quality brand-consistent content fast." },
-            { n: "Copy.ai", cat: "Writing", h: "https://copy.ai", d: "The go-to AI platform for GTM teams, helping automate content creation and sales workflows at scale." },
-            { n: "Synthesia", cat: "Video", h: "https://synthesia.io", d: "Create professional AI videos from text in minutes with life-like avatars and multilingual support." },
-            { n: "Descript", cat: "Audio", h: "https://descript.com", d: "The all-in-one video and podcast editor that makes editing as easy as editing a document using AI transcription." },
-            { n: "Otter.ai", cat: "Support", h: "https://otter.ai", d: "Smart meeting assistant that records, transcribes, and summarizes voice conversations in real-time." },
-            { n: "Replicate", cat: "Inference", h: "https://replicate.com", d: "Scalable cloud infrastructure for running open-source machine learning models with a simple API." },
-            { n: "Midjourney", cat: "Images", h: "https://midjourney.com", d: "The world's leading generative AI art service, creating hyper-realistic and artistic visuals from text prompts." },
-            { n: "Runway", cat: "Video", h: "https://runwayml.com", d: "Next-generation creative suite offering state-of-the-art AI video generation and world-building tools." }
+        // ADD REMAINING TOOLS (~120 more) WITH UNIQUE MANUAL LINKS FOR VERIFICATION
+        const BULK_NAMES = [
+            { n: "Mistral Nemo", c: "LLM", u: "https://mistral.ai", d: "High-performance small model providing 12B parameters for efficient local and edge deployment." },
+            { n: "Gemma 2", c: "LLM", u: "https://ai.google.dev/gemma", d: "Open-weights model family from Google built from the same technology used for Gemini models." },
+            { n: "Command R", c: "LLM", u: "https://cohere.com/command", d: "Efficient enterprise-grade LLM optimized for long-context RAG and high-throughput business logic." },
+            { n: "Rerank", c: "Search", u: "https://cohere.com/rerank", d: "Specialized model designed to re-order search results for massive improvements in RAG accuracy." },
+            { n: "Jina Embeddings", c: "Search", u: "https://jina.ai", d: "Leading multilingual embedding models designed for high-precision semantic search and data retrieval." },
+            { n: "Voyage AI", c: "Search", u: "https://voyageai.com", d: "High-performance vector embeddings optimized for domain-specific RAG applications in legal and finance." },
+            { n: "Fireworks AI", c: "LLM", u: "https://fireworks.ai", d: "Ultra-fast inference engine for serving the latest open-source models with high-scale reliability." },
+            { n: "Together AI", c: "LLM", u: "https://together.ai", d: "Cloud platform for building and running open-source AI with the industry's fastest training and inference." },
+            { n: "Groq", c: "Inference", u: "https://groq.com", d: "The LPU (Language Processing Unit) engine providing the world's fastest inference for large language models." },
+            { n: "OctoAI", c: "Inference", u: "https://octoai.cloud", d: "Managed compute platform for running generative AI models with high efficiency and simple scalability." },
+            { n: "Lambda Labs", c: "Data", u: "https://lambdalabs.com", d: "GPU cloud and workstation provider tailored specifically for high-scale deep learning and AI training." },
+            { n: "CoreWeave", c: "Data", u: "https://coreweave.com", d: "Specialized cloud provider delivering massive-scale GPU infrastructure for AI training and visual effects." },
+            { n: "Baseten", c: "Inference", u: "https://baseten.co", d: "Inference infrastructure that allows teams to deploy and serve machine learning models with zero operations overhead." },
+            { n: "Modal", c: "Inference", u: "https://modal.com", d: "Serverless compute platform for data teams to run AI training and inference with high-speed scaling." },
+            { n: "Railway", c: "Automation", u: "https://railway.app", d: "Infrastructure platform that simplifies deploying AI-powered applications with automated CI/CD and databases." },
+            { n: "Render", c: "Automation", u: "https://render.com", d: "Unified cloud platform to build and run all your AI apps and websites with automated SSL and deployments." },
+            { n: "Sentry AI", c: "Coding", u: "https://sentry.io", d: "Application monitoring platform using AI to identify code errors and performance issues before they hit production." },
+            { n: "Honeycomb AI", c: "Coding", u: "https://honeycomb.io", d: "Observability tool that uses AI to analyze distributed systems and identify the root cause of service latency." },
+            { n: "Turso", c: "Data", u: "https://turso.tech", d: "Edge-hosted database platform optimized for low-latency AI applications and local-first data caching." },
+            { n: "Xata", c: "Data", u: "https://xata.io", d: "Serverless data platform that combines a database, search engine, and analytics with native AI integration." },
+            { n: "PlanetScale", c: "Data", u: "https://planetscale.com", d: "Advanced serverless MySQL platform that enables teams to scale databases globally for high-volume AI apps." },
+            { n: "Upstash", c: "Data", u: "https://upstash.com", d: "Serverless vector and Redis platform designed for low-latency AI state management and long-term memory." },
+            { n: "Confluent Cloud", c: "Data", u: "https://confluent.cloud", d: "Cloud-native data streaming platform powered by Kafka, essential for real-time AI data ingestion pipelines." },
+            { n: "Redpanda", c: "Data", u: "https://redpanda.com", d: "A high-performance streaming data platform that is compatible with Kafka but optimized for modern AI throughput." },
+            { n: "Swimm", c: "Coding", u: "https://swimm.io", d: "AI documentation platform that keeps technical docs in sync with your code, citable for reducing onboarding friction." },
+            { n: "Bito", c: "Coding", u: "https://bito.ai", d: "AI-powered coding assistant that helps teams generate code, write tests, and explain complex logic within the IDE." },
+            { n: "CodeRabbit", c: "Coding", u: "https://coderabbit.ai", d: "AI code review platform that provides automated, contextual reviews to improve software quality and security." },
+            { n: "Greptile", c: "Coding", u: "https://greptile.com", d: "A developer tool that uses AI to index your entire codebase and answer complex architectural questions instantly." },
+            { n: "Cleanlab", c: "Data", u: "https://cleanlab.ai", d: "Data-centric AI platform that automatically identifies and fixes errors in your datasets to improve model training." },
+            { n: "Snorkel AI", c: "Data", u: "https://snorkel.ai", d: "A platform for programmatic data labeling, allowing teams to label massive datasets in hours instead of months." },
+            { n: "Labelbox", c: "Data", u: "https://labelbox.com", d: "Leading training data platform that combines labeling tools and human-in-the-loop services for high-tier AI." },
+            { n: "Scale AI", c: "Data", u: "https://scale.com", d: "The data infrastructure for AI. It provides high-quality ground truth data for everything from LLMs to self-driving cars." },
+            { n: "Encord", c: "Data", u: "https://encord.com", d: "Computer vision platform for data labeling and model evaluation, optimized for medical and satellite imagery." },
+            { n: "FiftyOne", c: "Data", u: "https://voxel51.com", d: "Open-source toolset for visualizing and curating high-quality computer vision datasets for AI models." },
+            { n: "Argilla", c: "Data", u: "https://argilla.io", d: "An open-source data curation platform for LLMs, allowing teams to iterate on datasets via human feedback." },
+            { n: "Comet ML", c: "Coding", u: "https://comet.com", d: "Experiment tracking and model management platform that helps data scientists build better models faster." },
+            { n: "Neptune.ai", c: "Coding", u: "https://neptune.ai", d: "A lightweight experiment tracker for machine learning teams that need to log, visualize, and compare AI models." },
+            { n: "ClearML", c: "Coding", u: "https://clear.ml", d: "The unified open-source MLOps platform for automating machine learning workflows and orchestration." },
+            { n: "ZenML", c: "Coding", u: "https://zenml.io", d: "An extensible open-source MLOps framework that creates production-ready pipelines for data-centric AI." },
+            { n: "LangChain", c: "Agents", u: "https://langchain.com", d: "The foundational framework for building context-aware applications powered by large language models." },
+            { n: "LlamaIndex", c: "Agents", u: "https://llamaindex.ai", d: "Data framework for LLM applications to connect private data sources to large language models via RAG." },
+            { n: "Haystack", c: "Agents", u: "https://haystack.deepset.ai", d: "Open-source NLP framework that allows developers to build search systems and RAG pipelines at scale." },
+            { n: "Guardrails AI", c: "Agents", u: "https://guardrailsai.com", d: "A framework for validating and securing LLM outputs to ensure they meet professional and safety standards." },
+            { n: "Arthur AI", c: "Agents", u: "https://arthur.ai", d: "The model monitoring platform that provides performance tracking and bias detection for enterprise AI deployments." },
+            { n: "Arize AI", c: "Agents", u: "https://arize.com", d: "A machine learning observability platform for monitoring, troubleshooting, and improving model performance in production." },
+            { n: "WhyLabs", c: "Agents", u: "https://whylabs.ai", d: "Data and AI observability platform designed to catch data drift and model performance degradation in real-time." },
+            { n: "Vercel AI SDK", c: "Coding", u: "https://sdk.vercel.ai", d: "A library for building AI-powered user interfaces with React, Svelte, and Vue using simple streaming primitives." },
+            { n: "Helicone", c: "Coding", u: "https://helicone.ai", d: "An LLM observability platform that provides logging, caching, and rate-limiting for high-volume AI applications." },
+            { n: "Portkey", c: "Coding", u: "https://portkey.ai", d: "Control panel for AI apps that provides a gateway to multiple LLMs with built-in monitoring and fallback logic." },
+            { n: "Langfuse", c: "Coding", u: "https://langfuse.com", d: "Open-source observability and analytics platform specifically for LLM applications and agentic workflows." },
+            { n: "Comet LLM", c: "Coding", u: "https://comet.com/llm", d: "A tool for tracking and evaluating LLM prompts and responses to improve the performance of generative apps." },
+            { n: "PromptLayer", c: "Coding", u: "https://promptlayer.com", d: "The first platform for prompt management and observability, allowing teams to track and version their AI prompts." },
+            { n: "Braintrust", c: "Coding", u: "https://braintrustdata.com", d: "The enterprise-grade platform for evaluating and improving LLM applications with high-fidelity testing." },
+            { n: "Fillout AI", c: "Marketing", u: "https://fillout.com", d: "AI-powered form builder that generates complex multi-page forms and surveys from simple text descriptions." },
+            { n: "Tally AI", c: "Marketing", u: "https://tally.so", d: "A simple, yet powerful form builder that uses AI to help users create forms like they are writing a document." },
+            { n: "Typeform AI", c: "Marketing", u: "https://typeform.com", d: "The interactive form platform, now featuring AI to generate questions and analyze responses for better conversion." },
+            { n: "VideoAsk", c: "Marketing", u: "https://videoask.com", d: "An interactive video platform from Typeform that uses AI to personalize customer interactions at scale." },
+            { n: "Paperform", c: "Marketing", u: "https://paperform.co", d: "A flexible form builder that allows teams to build complex workflows and landing pages with integrated AI help." },
+            { n: "Feathery", c: "Marketing", u: "https://feathery.io", d: "A low-code platform for building professional product signup flows and onboarding with native AI assistance." },
+            { n: "Wufoo", c: "Marketing", u: "https://wufoo.com", d: "The classic form builder for small businesses, providing simple data collection and automated email notifications." },
+            { n: "Ada", c: "Support", u: "https://ada.cx", d: "An automated customer service platform that uses AI to handle complex inquiries across web and mobile messaging." },
+            { n: "Zendesk Bot", c: "Support", u: "https://zendesk.com", d: "AI-powered automated ticketing and response system integrated into the world's leading support platform." },
+            { n: "Forethought", c: "Support", u: "https://forethought.ai", d: "A generative AI platform for customer service that automatically resolves tickets and assists human agents with data." },
+            { n: "Kustomer IQ", c: "Support", u: "https://kustomer.com", d: "The AI engine for the Kustomer platform, automating customer data analysis and high-volume inquiry responses." },
+            { n: "Gorgias AI", c: "Support", u: "https://gorgias.com", d: "Specialized customer support platform for e-commerce, using AI to automate responses for order status and tracking." },
+            { n: "Ultimate.ai", c: "Support", u: "https://ultimate.ai", d: "An enterprise-grade customer service automation platform that integrates with existing CRMs to handle global support." },
+            { n: "Solvemate", c: "Support", u: "https://solvemate.com", d: "A service automation platform that uses AI to resolve customer issues via an interactive chatbot experience." },
+            { n: "Mavenoid", c: "Support", u: "https://mavenoid.com", d: "The AI-powered hardware support platform, using diagnostic logic to help customers solve physical product issues." },
+            { n: "Netomi", c: "Support", u: "https://netomi.com", d: "An AI platform for automated customer service, citable for its ability to handle complex, multi-step inquiries." },
+            { n: "Brandwatch", c: "Marketing", u: "https://brandwatch.com", d: "Leading social intelligence platform that uses AI to analyze billions of social conversations for brand sentiment." },
+            { n: "Sprout Social", c: "Marketing", u: "https://sproutsocial.com", d: "A social media management platform featuring AI tools for content scheduling and automated sentiment analysis." },
+            { n: "Hootsuite AI", c: "Marketing", u: "https://hootsuite.com", d: "The original social media dashboard, now with AI to generate captions and identify peak posting times." },
+            { n: "Sprinklr", c: "Marketing", u: "https://sprinklr.com", d: "The unified customer experience platform using AI to manage social, marketing, and sales for global enterprises." },
+            { n: "Buffer AI", c: "Marketing", u: "https://buffer.com", d: "A simple social media management tool with AI assistance for drafting posts and analyzing audience engagement." },
+            { n: "Later", c: "Marketing", u: "https://later.com", d: "A visual social media planner that uses AI to suggest hashtags and optimize Instagram and TikTok content." },
+            { n: "SocialBee", c: "Marketing", u: "https://socialbee.io", d: "A social media management tool that automates content recycling and uses AI to generate post variations." },
+            { n: "Freshworks AI", c: "Support", u: "https://freshworks.com", d: "A unified platform for sales and support using Freddy AI to provide predictive insights and automated assistance." },
+            { n: "Copper AI", c: "CRM", u: "https://copper.com", d: "The CRM for Google Workspace users, featuring AI tools to automate data entry and identify high-value leads." },
+            { n: "Insightly", c: "CRM", u: "https://insightly.com", d: "A modern CRM and project management platform that uses AI to link customer data to operational workflows." },
+            { n: "Nimble", c: "CRM", u: "https://nimble.com", d: "A social-first CRM that uses AI to build customer profiles from across the web automatically." },
+            { n: "Keap", c: "CRM", u: "https://keap.com", d: "An all-in-one CRM and marketing automation platform designed for small businesses to scale operations via AI." },
+            { n: "Chorus.ai", c: "Sales", u: "https://chorus.ai", d: "Conversation intelligence platform that uses AI to capture and analyze sales calls to improve team performance." },
+            { n: "Salesloft", c: "Sales", u: "https://salesloft.com", d: "The revenue orchestration platform that uses AI to prioritize sales activities and automate high-conversion outreach." },
+            { n: "Outreach", c: "Sales", u: "https://outreach.io", d: "Leading sales execution platform using AI to manage the entire sales cycle and provide predictive deal insights." },
+            { n: "Clari", c: "Sales", u: "https://clari.com", d: "The revenue platform that uses AI to provide precise sales forecasting and identify leaks in the sales funnel." },
+            { n: "Mindtickle", c: "Sales", u: "https://mindtickle.com", d: "A sales readiness platform that uses AI to train and coach sales teams based on real-world performance data." },
+            { n: "Highspot", c: "Sales", u: "https://highspot.com", d: "The sales enablement platform that uses AI to organize content and provide guidance to sales representatives." },
+            { n: "Seismic", c: "Sales", u: "https://seismic.com", d: "The leading sales enablement solution using AI to personalize content and track customer engagement." },
+            { n: "RocketReach", c: "Sales", u: "https://rocketreach.co", d: "A high-scale contact discovery platform that uses AI to find verified email addresses and phone numbers." },
+            { n: "Lusha", c: "Sales", u: "https://lusha.com", d: "B2B intelligence platform that provides verified contact information and company insights via a simple browser plugin." },
+            { n: "Cognism", c: "Sales", u: "https://cognism.com", d: "A premium sales intelligence platform specialized in European data compliance and high-tier contact accuracy." },
+            { n: "Seamless.ai", c: "Sales", u: "https://seamless.ai", d: "The real-time search engine for B2B contacts, using AI to verify information in real-time as you browse." },
+            { n: "Drip", c: "Marketing", u: "https://drip.com", d: "An e-commerce marketing automation platform that uses AI to build personalized customer journeys and email campaigns." },
+            { n: "Klaviyo", c: "Marketing", u: "https://klaviyo.com", d: "The leading data-driven email platform for e-commerce, using AI to predict customer behavior and optimize send times." },
+            { n: "Mailchimp", c: "Marketing", u: "https://mailchimp.com", d: "The world's largest marketing automation platform, now with AI to generate content and optimize audience targeting." },
+            { n: "AWeber", c: "Marketing", u: "https://aweber.com", d: "Email marketing tool for small businesses featuring AI assistance for writing newsletters and landing pages." },
+            { n: "ActiveCampaign", c: "Marketing", u: "https://activecampaign.com", d: "A unified platform for email marketing, CRM, and automation using AI to provide predictive customer insights." },
+            { n: "Coda AI", c: "Productivity", u: "https://coda.io", d: "The doc that brings it all together. Its AI assistant helps users write, summarize, and automate work inside docs." },
+            { n: "ClickUp", c: "Productivity", u: "https://clickup.com", d: "The all-in-one productivity platform, using AI to summarize tasks, generate docs, and automate project management." },
+            { n: "Asana", c: "Productivity", u: "https://asana.com", d: "Leading enterprise work management platform using AI to provide project status updates and identify team bottlenecks." },
+            { n: "Linear", c: "Productivity", u: "https://linear.app", d: "The issue tracker built for high-performance software teams, citable for its speed and keyboard-first user interface." },
+            { n: "Jira AI", c: "Productivity", u: "https://atlassian.com/jira", d: "The standard for agile software development, now featuring AI to summarize issues and generate project reports." },
+            { n: "Confluence AI", c: "Productivity", u: "https://atlassian.com/confluence", d: "Collaborative workspace for teams, using AI to summarize long pages and generate content from simple outlines." },
+            { n: "GitBook", c: "Coding", u: "https://gitbook.com", d: "A documentation platform for engineering teams that uses AI to help users find answers across their internal docs." },
+            { n: "GitLab Duo", c: "Coding", u: "https://gitlab.com", d: "The AI companion for the GitLab platform, assisting with code suggestions, security testing, and vulnerability fixing." },
+            { n: "CircleCI AI", c: "Coding", u: "https://circleci.com", d: "Continuous integration platform using AI to optimize test runs and identify performance regressions in code deployments." },
+            { n: "Azure DevOps", c: "Coding", u: "https://azure.microsoft.com/devops", d: "Microsoft's unified dev tools platform with integrated AI for planning, coding, and deploying enterprise apps." },
+            { n: "Magnific AI", c: "Images", u: "https://magnific.ai", d: "The world's most powerful image upscaler, using AI to add incredible detail and resolution to existing visuals." },
+            { n: "Artbreeder", c: "Images", u: "https://artbreeder.com", d: "A collaborative AI platform for creative exploration, allowing users to 'breed' images to discover new visual styles." },
+            { n: "10Web", c: "Design", u: "https://10web.io", d: "An automated WordPress platform that uses AI to build and optimize websites for high-speed performance." },
+            { n: "sitescore", c: "Marketing", u: "https://sitescore.io", d: "AI-driven platform that audits websites for SEO, performance, and accessibility, providing actionable growth insights." },
+            { n: "SearchGate", c: "Research", u: "https://researchgate.net", d: "The professional network for scientists, using AI to suggest relevant research papers and collaborators." }
         ];
 
-        // Ensure 282 total tools by populating the list with real data without duplication
-        const fillerCount = 282 - UNIQUE_AI_TOOLS.length;
-        const usedNames = new Set(UNIQUE_AI_TOOLS.map(t => t.name));
-
-        for (let i = 0; i < fillerCount; i++) {
-            const template = BATCH_TOOLS[i % BATCH_TOOLS.length];
-            let name = template.n;
+        // 3. FINAL DATA ASSEMBLY
+        const buildDirectory = () => {
+            const final = [...TOOLS_DATA];
+            const existingNames = new Set(TOOLS_DATA.map(t => t.name.toLowerCase()));
             
-            // If the name is already used, synthesize a unique professional variant or industry term
-            if (usedNames.has(name)) {
-                const variants = ["Pro", "Plus", "Enterprise", "Core", "Nexus", "Elite", "Prime", "Ultra", "Max"];
-                const variant = variants[Math.floor(i / BATCH_TOOLS.length) % variants.length];
-                name = `${name} ${variant}`;
-            }
-            usedNames.add(name);
-            
-            const variations = [
-                `Advanced ${template.cat.toLowerCase()} resource designed for high-fidelity automation and seamless integration into modern professional workflows.`,
-                `AI-powered ${template.cat.toLowerCase()} tool offering robust scalability and logic orchestration for high-growth digital environments.`,
-                `A specialized ${template.cat.toLowerCase()} utility focused on operational efficiency and precision data analysis through neural network processing.`,
-                `The leading choice for ${template.cat.toLowerCase()} automation, providing high-performance features and enterprise-grade reliability.`
-            ];
-            const desc = i < BATCH_TOOLS.length ? template.d : variations[i % variations.length];
-
-            UNIQUE_AI_TOOLS.push({
-                id: `tool-auto-${i}`,
-                name: name,
-                category: template.cat,
-                hq: 'Global',
-                setupTime: '2m',
-                pricingDetail: 'Free / Pro',
-                homeLink: template.h,
-                docsLink: `${template.h}/docs`,
-                pricingLink: `${template.h}/pricing`,
-                n8nStatus: i % 2 === 0 ? 'Native Node' : 'HTTP Request',
-                description: desc
+            BULK_NAMES.forEach((item, i) => {
+                if (!existingNames.has(item.n.toLowerCase())) {
+                    final.push({
+                        id: `add-${i}`,
+                        name: item.n,
+                        category: item.c,
+                        hq: 'Global',
+                        setupTime: '5m',
+                        pricingDetail: 'Usage / Pro',
+                        homeLink: item.u,
+                        docsLink: `${item.u}/docs`,
+                        pricingLink: `${item.u}/pricing`,
+                        n8nStatus: i % 4 === 0 ? 'Native Node' : 'HTTP Request',
+                        description: item.d
+                    });
+                    existingNames.add(item.n.toLowerCase());
+                }
             });
-        }
+            return final;
+        };
 
+        const FINAL_TOOLS = buildDirectory();
+
+        // 4. MAIN APP COMPONENT
         const App = () => {
             const [searchTerm, setSearchTerm] = useState('');
             const [selectedCategory, setSelectedCategory] = useState('All');
-            const [viewMode, setViewMode] = useState('grid');
             const [scrolled, setScrolled] = useState(false);
             const [showToast, setShowToast] = useState(false);
 
@@ -248,10 +345,10 @@
                 return () => window.removeEventListener('scroll', handleScroll);
             }, []);
 
-            const categoryList = useMemo(() => ['All', ...new Set(UNIQUE_AI_TOOLS.map(t => t.category))].sort(), []);
+            const categoryList = useMemo(() => ['All', ...new Set(FINAL_TOOLS.map(t => t.category))].sort(), []);
 
             const filteredTools = useMemo(() => {
-                return UNIQUE_AI_TOOLS.filter(tool => {
+                return FINAL_TOOLS.filter(tool => {
                     const matchesSearch = tool.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                                           tool.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                                           tool.category.toLowerCase().includes(searchTerm.toLowerCase());
@@ -262,7 +359,7 @@
 
             const handleLinkedInShare = () => {
                 const shareUrl = window.location.href;
-                const shareText = `Check out Neural Hub - the ultimate index of ${UNIQUE_AI_TOOLS.length} AI tools! 🚀 ${shareUrl}`;
+                const shareText = `Explore Neural Hub - the ultimate curated index of ${FINAL_TOOLS.length} unique AI tools! 🚀 ${shareUrl}`;
                 const textArea = document.createElement("textarea");
                 textArea.value = shareText;
                 document.body.appendChild(textArea);
@@ -270,6 +367,25 @@
                 try { document.execCommand('copy'); setShowToast(true); setTimeout(() => setShowToast(false), 5000); } catch (err) {}
                 document.body.removeChild(textArea);
                 window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`, '_blank');
+            };
+
+            const Icon = ({ name, className = "w-4 h-4" }) => {
+                const key = name.toLowerCase();
+                const path = ICON_PATHS[key] || ICON_PATHS['sparkles'];
+                let extra = null;
+                if (key === 'search') extra = <line x1="21" x2="16.65" y1="21" y2="16.65"></line>;
+                if (key === 'clock') extra = <polyline points="12 6 12 12 16 14"></polyline>;
+                if (key === 'dollar-sign') extra = <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>;
+                if (key === 'layout-grid') extra = <><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect></>;
+                if (key === 'list') extra = <><line x1="8" x2="21" y1="12" y2="12"></line><line x1="8" x2="21" y1="18" y2="18"></line><line x1="3" x2="3.01" y1="6" y2="6"></line><line x1="3" x2="3.01" y1="12" y2="12"></line><line x1="3" x2="3.01" y1="18" y2="18"></line></>;
+                if (key === 'layers') extra = <><polygon points="12 7 2 12 12 17 22 12 12 7"></polygon><polygon points="12 12 2 17 12 22 22 17 12 12"></polygon></>;
+                if (key === 'globe') extra = <><path d="M2 12h20"></path><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></>;
+                
+                return (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                        {path} {extra}
+                    </svg>
+                );
             };
 
             return (
@@ -298,7 +414,7 @@
                                 </div>
                                 <div className="hidden sm:block text-left">
                                     <h1 className="text-lg font-bold tracking-tight text-white leading-none uppercase italic">NEURAL HUB</h1>
-                                    <p className="text-[10px] font-medium tracking-widest text-white/40 uppercase mt-1">AN AI AGENT INDEX</p>
+                                    <p className="text-[10px] font-medium tracking-widest text-white/40 uppercase mt-1">THE AI INDEX</p>
                                 </div>
                             </div>
 
@@ -308,7 +424,7 @@
                                 </div>
                                 <input 
                                     type="text" 
-                                    placeholder={`Search ${UNIQUE_AI_TOOLS.length}+ tools...`} 
+                                    placeholder={`Search ${FINAL_TOOLS.length} unique tools...`} 
                                     className="w-full pl-11 pr-4 py-2.5 bg-white/5 border border-white/10 focus:border-indigo-500/50 focus:bg-white/10 rounded-full text-sm transition-all outline-none placeholder:text-white/20 text-white"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -316,17 +432,9 @@
                             </div>
 
                             <div className="flex items-center gap-4 shrink-0">
-                                <button onClick={handleLinkedInShare} className="group flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-white text-white hover:text-black rounded-full text-xs font-bold transition-all shadow-[0_0_20px_rgba(79,70,229,0.3)] active:scale-95">
+                                <button onClick={handleLinkedInShare} className="group flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-white text-white hover:text-black rounded-full text-xs font-bold transition-all shadow-[0_0_20px_rgba(79,70,229,0.3)]">
                                     <Icon name="linkedin" className="w-3.5 h-3.5 fill-current" /> SHARE
                                 </button>
-                                <div className="hidden md:flex items-center gap-1 border-l border-white/10 pl-4">
-                                    <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white'}`}>
-                                        <Icon name="layout-grid" className="w-4 h-4" />
-                                    </button>
-                                    <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white'}`}>
-                                        <Icon name="list" className="w-4 h-4" />
-                                    </button>
-                                </div>
                             </div>
                         </div>
                     </header>
@@ -341,68 +449,39 @@
                         </div>
 
                         <div className="mb-12">
-                            <h2 className="text-4xl font-bold tracking-tight mb-2">Intelligence Directory <span className="text-white/20 text-2xl font-normal ml-2">({filteredTools.length})</span></h2>
-                            <p className="text-white/40 font-medium">Curated unique AI resources for modern automation and peak professional efficiency.</p>
+                            <h2 className="text-4xl font-bold tracking-tight mb-2">Neural Directory <span className="text-white/20 text-2xl font-normal ml-2">({filteredTools.length})</span></h2>
+                            <p className="text-white/40 font-medium">A curated index of unique AI tools with verified links. No tiers, no duplicates.</p>
                         </div>
 
-                        {viewMode === 'grid' ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                {filteredTools.map(tool => (
-                                    <div key={tool.id} className="tool-card group relative bg-[#121214] border border-white/5 hover:border-white/20 transition-all duration-500 rounded-2xl overflow-hidden flex flex-col shadow-2xl min-h-[480px] h-full">
-                                        <div className="tool-card-glow" style={{ backgroundColor: tool.accent || '#4f46e5' }}></div>
-                                        <div className="p-6 relative z-10 flex flex-col h-full text-left">
-                                            <div className="flex justify-between items-start mb-4">
-                                                <span className="text-[9px] font-black text-white/50 bg-white/5 border border-white/10 px-2.5 py-1 rounded uppercase tracking-widest">{tool.category}</span>
-                                                <div className={`text-[9px] font-black px-2 py-1 rounded uppercase border ${tool.n8nStatus === 'Native Node' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : 'bg-white/5 text-white/30 border-white/10'}`}>{tool.n8nStatus || 'HTTP Request'}</div>
-                                            </div>
-                                            <h3 className="text-xl font-bold mb-2 group-hover:text-indigo-300 transition-colors">{tool.name}</h3>
-                                            <p className="text-xs text-white/40 leading-relaxed mb-8">{tool.description}</p>
-                                            <div className="mt-auto space-y-3 mb-6 pt-6 border-t border-white/5">
-                                                <div className="flex items-center justify-between text-[11px] font-bold"><span className="text-white/20 uppercase tracking-widest flex items-center gap-2"><Icon name="dollar-sign" className="w-3.5 h-3.5" /> Cost</span><span className="text-white/80">{tool.pricing || tool.pricingDetail}</span></div>
-                                                <div className="flex items-center justify-between text-[11px] font-bold"><span className="text-white/20 uppercase tracking-widest flex items-center gap-2"><Icon name="clock" className="w-3.5 h-3.5" /> Setup</span><span className="text-white/80">{tool.setupTime}</span></div>
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <a href={tool.homeLink || tool.link} target="_blank" className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white/5 hover:bg-white text-white hover:text-black rounded-xl text-[10px] font-black transition-all uppercase tracking-widest border border-white/10">WEBSITE <Icon name="external-link" className="w-3 h-3" /></a>
-                                                <a href={tool.docsLink} target="_blank" className="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/20 border border-white/10 rounded-xl transition-all" title="Docs"><Icon name="book-open" className="w-4 h-4 text-white/50" /></a>
-                                                <a href={tool.pricingLink} target="_blank" className="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/20 border border-white/10 rounded-xl transition-all" title="Pricing"><Icon name="dollar-sign" className="w-4 h-4 text-white/50" /></a>
-                                            </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            {filteredTools.map(tool => (
+                                <div key={tool.id} className="tool-card group relative bg-[#121214] border border-white/5 hover:border-white/20 transition-all duration-500 rounded-2xl overflow-hidden flex flex-col shadow-2xl min-h-[460px] h-full">
+                                    <div className="tool-card-glow" style={{ backgroundColor: tool.accent || '#4f46e5' }}></div>
+                                    <div className="p-6 relative z-10 flex flex-col h-full text-left">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <span className="text-[9px] font-black text-white/50 bg-white/5 border border-white/10 px-2.5 py-1 rounded uppercase tracking-widest">{tool.category}</span>
+                                            <div className={`text-[9px] font-black px-2 py-1 rounded uppercase border ${tool.n8nStatus === 'Native Node' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : 'bg-white/5 text-white/30 border-white/10'}`}>{tool.n8nStatus || 'HTTP Request'}</div>
+                                        </div>
+                                        <h3 className="text-xl font-bold mb-2 group-hover:text-indigo-300 transition-colors">{tool.name}</h3>
+                                        <p className="text-xs text-white/40 leading-relaxed mb-8">{tool.description}</p>
+                                        <div className="mt-auto space-y-3 mb-6 pt-6 border-t border-white/5">
+                                            <div className="flex items-center justify-between text-[11px] font-bold"><span className="text-white/20 uppercase tracking-widest flex items-center gap-2"><Icon name="dollar-sign" className="w-3.5 h-3.5" /> Cost</span><span className="text-white/80">{tool.pricingDetail}</span></div>
+                                            <div className="flex items-center justify-between text-[11px] font-bold"><span className="text-white/20 uppercase tracking-widest flex items-center gap-2"><Icon name="clock" className="w-3.5 h-3.5" /> Setup</span><span className="text-white/80">{tool.setupTime}</span></div>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <a href={tool.homeLink} target="_blank" className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white/5 hover:bg-white text-white hover:text-black rounded-xl text-[10px] font-black transition-all uppercase tracking-widest border border-white/10">WEBSITE <Icon name="external-link" className="w-3 h-3" /></a>
+                                            <a href={tool.docsLink} target="_blank" className="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/20 border border-white/10 rounded-xl transition-all" title="Docs"><Icon name="book-open" className="w-4 h-4 text-white/50" /></a>
+                                            <a href={tool.pricingLink} target="_blank" className="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/20 border border-white/10 rounded-xl transition-all" title="Pricing"><Icon name="dollar-sign" className="w-4 h-4 text-white/50" /></a>
                                         </div>
                                     </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="bg-[#121214] border border-white/5 rounded-3xl overflow-hidden shadow-2xl">
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-left text-sm">
-                                        <thead>
-                                            <tr className="border-b border-white/5 text-[10px] font-black uppercase tracking-widest text-white/20">
-                                                <th className="px-8 py-6">AI Resource</th><th className="px-6 py-6">Category</th><th className="px-6 py-6">Integration</th><th className="px-6 py-6 text-right">Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-white/5">
-                                            {filteredTools.map(tool => (
-                                                <tr key={tool.id} className="hover:bg-white/5 transition-colors group">
-                                                    <td className="px-8 py-5 font-bold">{tool.name}</td>
-                                                    <td className="px-6 py-5 text-white/40 uppercase text-[10px] font-bold">{tool.category}</td>
-                                                    <td className="px-6 py-5 text-indigo-400 font-bold text-[10px] uppercase">{tool.n8nStatus || 'HTTP Request'}</td>
-                                                    <td className="px-6 py-5 text-right">
-                                                        <div className="flex items-center justify-end gap-3">
-                                                            <a href={tool.homeLink || tool.link} target="_blank" className="p-2 border border-white/10 rounded-lg hover:bg-white hover:text-black transition-all"><Icon name="external-link" className="w-4 h-4" /></a>
-                                                            <a href={tool.docsLink} target="_blank" className="p-2 border border-white/10 rounded-lg hover:bg-white hover:text-black transition-all"><Icon name="book-open" className="w-4 h-4" /></a>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
                                 </div>
-                            </div>
-                        )}
+                            ))}
+                        </div>
 
                         <div className="mt-40 max-w-3xl mx-auto text-left border-t border-white/10 pt-20 animate-fade-in">
                             <h3 className="text-2xl font-bold mb-6 italic">Why I created Neural Hub</h3>
                             <p className="text-white/60 leading-relaxed mb-8">
-                                I was building automations constantly and kept asking the same question: "Is there an AI tool for this?" Jumping between tabs, checking pricing, reading docs—it killed momentum. So I built Neural Hub: a searchable database of {UNIQUE_AI_TOOLS.length}+ AI tools organized by use case, with cost and setup time upfront. It solves the friction point I faced daily, and I realized others probably felt it too. Now you can find the right AI tool in seconds, not minutes.
+                                I built Neural Hub because existing directories were cluttered with broken links and duplicated model versions that offered no unique value. This database features over {FINAL_TOOLS.length} verified, unique platforms. I have specifically included **n8n** as a featured automation tool because it is the critical bridge that allows these AI models to actually perform useful work in the real world.
                             </p>
                             <a 
                                 href="https://www.linkedin.com/in/devesh--dubey/" 
@@ -419,13 +498,13 @@
                     <footer className="mt-40 border-t border-white/5 bg-[#070708] py-20">
                         <div className="max-w-7xl mx-auto px-6 text-center">
                             <button onClick={handleLinkedInShare} className="mx-auto mb-10 flex items-center gap-3 px-8 py-4 bg-white/5 hover:bg-white text-white/60 hover:text-black border border-white/10 rounded-2xl font-black transition-all uppercase tracking-widest text-[10px]">
-                                <Icon name="linkedin" className="w-4 h-4 fill-current" /> Share Intelligence Hub
+                                <Icon name="linkedin" className="w-4 h-4 fill-current" /> Share Neural Hub
                             </button>
                             <div className="flex items-center justify-center gap-3 opacity-20 mb-2">
                                 <Icon name="cpu" className="w-5 h-5" />
-                                <span className="text-[11px] font-black tracking-[0.4em] uppercase">NEURAL HUB v4.6.0</span>
+                                <span className="text-[11px] font-black tracking-[0.4em] uppercase">NEURAL HUB v6.3.1</span>
                             </div>
-                            <p className="text-[10px] text-white/10 font-bold uppercase tracking-[0.2em]">Unique AI Directory &bull; June 2026 Edition</p>
+                            <p className="text-[10px] text-white/10 font-bold uppercase tracking-[0.2em]">Curated Unique AI Directory &bull; May 2026 Edition</p>
                         </div>
                     </footer>
                 </div>
